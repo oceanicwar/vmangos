@@ -9,58 +9,26 @@ public:
     PlayerActionScript() : ActionScript("PlayerActionScript") { }
 
 public:
-    void OnPlayerUseItem(Player* player, Item* item) override
-    {
-        WorldPacket serverMsg(SMSG_SERVER_MESSAGE);
-        serverMsg << 3; // ServerMessageType::Custom
-        serverMsg << "OnPlayerUseItem";
-
-        player->SendDirectMessage(&serverMsg);
-    }
-
-    void OnPlayerCastSpell(Player* player, Spell* spell) override
-    {
-        WorldPacket serverMsg(SMSG_SERVER_MESSAGE);
-        serverMsg << 3; // ServerMessageType::Custom
-        serverMsg << "OnPlayerCastSpell";
-
-        player->SendDirectMessage(&serverMsg);
-    }
-
     void OnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected) override
     {
-        Player* player = aggressor->ToPlayer();
+        if(!spell || !spellProto)
+        {
+            return;
+        }
 
+        if(!spellProto->Id != 2537 /* Crusader Strike - Rank 1 */)
+        {
+            return;
+        }
+
+        Player* player = aggressor->ToPlayer();
         if(!player)
         {
             return;
         }
 
-        WorldPacket serverMsg(SMSG_SERVER_MESSAGE);
-        serverMsg << 3; // ServerMessageType::Custom
-        serverMsg << "You damaged a unit.";
-
-        player->SendDirectMessage(&serverMsg);
-    }
-
-    bool OnPlayerIsSpellFitByClassAndRace(const Player* player, uint32 spellId) override
-    {
-        if(!player || !spellId)
-        {
-            return false;
-        }
-
-        if(player->GetClass() != CLASS_PALADIN)
-        {
-            return false;
-        }
-
-        if(spellId != 2537 /* Crusader Strike - Rank 1 */)
-        {
-            return false;
-        }
-
-        return true;
+        // Double the damage of Crusader Strike - Rank 1, maybe scale this with weapon damage later?
+        damage = damage * 2;
     }
 };
 
