@@ -84,6 +84,33 @@ void ActionMgr::ActionOnPlayerCastSpell(Player* player, Spell* spell)
     }
 }
 
+bool ActionMgr::ActionOnPlayerIsSpellFitByClassAndRace(const Player* player, uint32 spellId)
+{
+    auto it = actionScripts.find(ACTION_ON_PLAYER_SPELL_FIT_CLASS_RACE);
+    if(it == actionScripts.end())
+    {
+        return false;
+    }
+
+    auto scripts = it->second;
+    if(scripts.empty())
+    {
+        return false;
+    }
+
+    bool result = false;
+
+    for(auto& script : scripts)
+    {
+        if(script->OnPlayerIsSpellFitByClassAndRace(player, spellId))
+        {
+            result = true;
+        }
+    }
+
+    return result;
+}
+
 void ActionMgr::ActionOnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected)
 {
     auto it = actionScripts.find(ACTION_ON_UNIT_DAMAGE);

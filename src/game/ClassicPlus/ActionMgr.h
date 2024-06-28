@@ -22,6 +22,9 @@ public:
     // Triggered when a player casts a spell.
     virtual void OnPlayerCastSpell(Player* player, Spell* spell) { }
 
+    // Triggered when the core checks if a spell fits the class and race for a player.
+    virtual bool OnPlayerIsSpellFitByClassAndRace(const Player* player, uint32 spellId) { return false; }
+
     /* ====================================================== */
 
     /* ===================== UNIT HOOKS ===================== */
@@ -44,10 +47,11 @@ enum ActionTypes : uint32
 {
     ACTION_ON_PLAYER_USE_ITEM = 0,
     ACTION_ON_PLAYER_CAST_SPELL = 1,
+    ACTION_ON_PLAYER_SPELL_FIT_CLASS_RACE = 2,
 
-    ACTION_ON_UNIT_DAMAGE = 2,
+    ACTION_ON_UNIT_DAMAGE = 3,
 
-    ACTION_TYPES_END = 3
+    ACTION_TYPES_END = 4
 };
 
 class ActionMgr
@@ -61,6 +65,7 @@ public:
 
     void ActionOnPlayerUseItem(Player* player, Item* item);
     void ActionOnPlayerCastSpell(Player* player, Spell* spell);
+    bool ActionOnPlayerIsSpellFitByClassAndRace(const Player* player, uint32 spellId);
 
     void ActionOnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected);
 

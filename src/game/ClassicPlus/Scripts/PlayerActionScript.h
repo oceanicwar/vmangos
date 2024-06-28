@@ -42,6 +42,26 @@ public:
 
         player->SendDirectMessage(&serverMsg);
     }
+
+    bool OnPlayerIsSpellFitByClassAndRace(const Player* player, uint32 spellId) override
+    {
+        if(!player || !spellId)
+        {
+            return false;
+        }
+
+        if(player->GetClass() != CLASS_PALADIN)
+        {
+            return false;
+        }
+
+        if(spellId != 2537 /* Crusader Strike - Rank 1 */)
+        {
+            return false;
+        }
+
+        return true;
+    }
 };
 
 #endif
