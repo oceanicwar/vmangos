@@ -1,0 +1,65 @@
+#include "ActionMgr.h"
+
+#include "Log.h"
+#include "Policies/SingletonImp.h"
+
+INSTANTIATE_SINGLETON_1(ActionMgr);
+
+ActionMgr::ActionMgr()
+{
+    // Fill the action scripts map with empty action types.
+    for(uint32 i = 0; i < ACTION_TYPES_END; ++i)
+    {
+        actionScripts.emplace(i, std::vector<ActionScript*>());
+    }
+}
+
+ActionMgr::~ActionMgr() 
+{ 
+    for(const auto& actions : actionScripts)
+    {
+        for(const auto& script : actions.second)
+        {
+            delete script;
+        }
+    }
+
+    actionScripts.clear();
+}
+
+void ActionMgr::RegisterActions(ActionScript* script, std::vector<uint32> actions)
+{
+    for(auto it = actions.begin(); it != actions.end(); ++it)
+    {
+        uint32 actionType = (*it);
+
+        auto action = actionScripts.find(actionType);
+        if(action == actionScripts.end())
+        {
+            sLog.Out(LOG_BASIC, LOG_LVL_ERROR, "Unknown action type '%u' for action script '%s'.", actionType, script->GetName());
+            continue;
+        }
+
+        action->second.push_back(script);
+    }
+}
+
+void ActionMgr::ActionOnPlayerUseItem(Player* player, Item* item)
+{
+    auto it = actionScripts.find(ACTION_ON_PLAYER_USE_ITEM);
+    if(it == actionScripts.end())
+    {
+        return;
+    }
+
+    auto scripts = it->second;
+    if(scripts.empty())
+    {
+        return;
+    }
+
+    for(auto& script : scripts)
+    {
+        script->OnPlayerUseItem(player, item);
+    }
+}

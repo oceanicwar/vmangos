@@ -31,6 +31,8 @@
 #include "GameObject.h"
 #include "Map.h"
 
+#include "ActionMgr.h"
+
 using namespace Spells;
 
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
@@ -157,6 +159,8 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     }
 
     pUser->CastItemUseSpell(pItem, targets);
+
+    sActionMgr.ActionOnPlayerUseItem(pUser, pItem);
 }
 
 void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
