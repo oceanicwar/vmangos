@@ -629,6 +629,8 @@ void Unit::DoKillUnit(Unit* pVictim)
 
 uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected)
 {
+    sActionMgr.ActionOnUnitDamage(this, pVictim, damage, cleanDamage, damagetype, damageSchoolMask, spellProto, durabilityLoss, spell, reflected);
+    
     // World of Warcraft Client Patch 1.7.0 (2005-09-13)
     // - Fixed bug where self-inflicted damage, like Poisonous Blood, wouldn't
     //   break stealth.
@@ -923,8 +925,6 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             he->DuelComplete(DUEL_WON);
         }
     }
-
-    sActionMgr.ActionOnUnitDamage(this, pVictim, damage, cleanDamage, damagetype, damageSchoolMask, spellProto, durabilityLoss, spell, reflected);
 
     return damage;
 
