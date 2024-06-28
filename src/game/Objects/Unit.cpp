@@ -57,6 +57,8 @@
 #include "InstanceStatistics.h"
 #include "MovementPacketSender.h"
 
+#include "ActionMgr.h"
+
 //#define DEBUG_DEBUFF_LIMIT
 
 float baseMoveSpeed[MAX_MOVE_TYPE] =
@@ -921,6 +923,8 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             he->DuelComplete(DUEL_WON);
         }
     }
+
+    sActionMgr.ActionOnUnitDamage(this, pVictim, damage, cleanDamage, damagetype, damageSchoolMask, spellProto, durabilityLoss, spell, reflected);
 
     return damage;
 

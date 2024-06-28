@@ -26,6 +26,22 @@ public:
 
         player->SendDirectMessage(&serverMsg);
     }
+
+    void OnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected) override
+    {
+        Player* player = aggressor->ToPlayer();
+
+        if(!player)
+        {
+            return;
+        }
+
+        WorldPacket serverMsg(SMSG_SERVER_MESSAGE);
+        serverMsg << 3; // ServerMessageType::Custom
+        serverMsg << "You damaged a unit.";
+
+        player->SendDirectMessage(&serverMsg);
+    }
 };
 
 #endif

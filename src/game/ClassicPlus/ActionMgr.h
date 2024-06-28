@@ -24,6 +24,13 @@ public:
 
     /* ====================================================== */
 
+    /* ===================== UNIT HOOKS ===================== */
+
+    // Triggered after the calculations for damage have passed when a unit deals damage to another unit.
+    virtual void OnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected) { }
+
+    /* ====================================================== */
+
     const char* GetName()
     {
         return _name;
@@ -37,7 +44,10 @@ enum ActionTypes : uint32
 {
     ACTION_ON_PLAYER_USE_ITEM = 0,
     ACTION_ON_PLAYER_CAST_SPELL = 1,
-    ACTION_TYPES_END = 2
+
+    ACTION_ON_UNIT_DAMAGE = 2,
+
+    ACTION_TYPES_END = 3
 };
 
 class ActionMgr
@@ -51,6 +61,8 @@ public:
 
     void ActionOnPlayerUseItem(Player* player, Item* item);
     void ActionOnPlayerCastSpell(Player* player, Spell* spell);
+
+    void ActionOnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected);
 
 private:
     std::map<uint32, std::vector<ActionScript*>> actionScripts;
