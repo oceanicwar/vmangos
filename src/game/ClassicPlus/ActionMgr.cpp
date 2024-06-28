@@ -63,3 +63,23 @@ void ActionMgr::ActionOnPlayerUseItem(Player* player, Item* item)
         script->OnPlayerUseItem(player, item);
     }
 }
+
+void ActionMgr::ActionOnPlayerCastSpell(Player* player, Spell* spell)
+{
+    auto it = actionScripts.find(ACTION_ON_PLAYER_CAST_SPELL);
+    if(it == actionScripts.end())
+    {
+        return;
+    }
+
+    auto scripts = it->second;
+    if(scripts.empty())
+    {
+        return;
+    }
+
+    for(auto& script : scripts)
+    {
+        script->OnPlayerCastSpell(player, spell);
+    }
+}

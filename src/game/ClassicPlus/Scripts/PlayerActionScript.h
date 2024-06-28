@@ -17,6 +17,15 @@ public:
 
         player->SendDirectMessage(&serverMsg);
     }
+
+    void OnPlayerCastSpell(Player* player, Spell* spell) override
+    {
+        WorldPacket serverMsg(SMSG_SERVER_MESSAGE);
+        serverMsg << 3; // ServerMessageType::Custom
+        serverMsg << "OnPlayerCastSpell";
+
+        player->SendDirectMessage(&serverMsg);
+    }
 };
 
 #endif

@@ -4,6 +4,7 @@
 #include "Item.h"
 #include "Player.h"
 #include "Policies/Singleton.h"
+#include "Spell.h"
 
 class ActionScript
 {
@@ -13,7 +14,15 @@ public:
         _name = name;
     }
 
+    /* ==================== PLAYER HOOKS ==================== */
+
+    // Triggered when a player uses an item.
     virtual void OnPlayerUseItem(Player* player, Item* item) { }
+
+    // Triggered when a player casts a spell.
+    virtual void OnPlayerCastSpell(Player* player, Spell* spell) { }
+
+    /* ====================================================== */
 
     const char* GetName()
     {
@@ -27,7 +36,8 @@ private:
 enum ActionTypes : uint32
 {
     ACTION_ON_PLAYER_USE_ITEM = 0,
-    ACTION_TYPES_END = 1
+    ACTION_ON_PLAYER_CAST_SPELL = 1,
+    ACTION_TYPES_END = 2
 };
 
 class ActionMgr
@@ -40,6 +50,7 @@ public:
     void RegisterActions(ActionScript* script, std::vector<uint32> actions);
 
     void ActionOnPlayerUseItem(Player* player, Item* item);
+    void ActionOnPlayerCastSpell(Player* player, Spell* spell);
 
 private:
     std::map<uint32, std::vector<ActionScript*>> actionScripts;
