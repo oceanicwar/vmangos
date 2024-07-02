@@ -31,6 +31,8 @@
 #include "GameObject.h"
 #include "Map.h"
 
+#include "ActionMgr.h"
+
 using namespace Spells;
 
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
@@ -157,6 +159,8 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     }
 
     pUser->CastItemUseSpell(pItem, targets);
+
+    sActionMgr.ActionOnPlayerUseItem(pUser, pItem);
 }
 
 void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
@@ -350,6 +354,8 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     // Nostalrius : Ivina
     spell->SetClientStarted(true);
     spell->prepare(std::move(targets));
+
+    sActionMgr.ActionOnPlayerCastSpell(_player, spell);
 }
 
 void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)

@@ -456,6 +456,20 @@ else()
   )
 endif()
 
+# ClassicPlus Action Scripting
+list(APPEND game_SRCS
+	${CMAKE_SOURCE_DIR}/src/game/ClassicPlus/ActionMgr.cpp
+	${CMAKE_SOURCE_DIR}/src/game/ClassicPlus/ActionMgr.h
+	${CMAKE_SOURCE_DIR}/src/game/ClassicPlus/ActionScripts.cpp
+)
+
+# ClassicPlus Action Scripts
+file(GLOB_RECURSE ACTION_SCRIPTS
+	${CMAKE_SOURCE_DIR}/src/game/ClassicPlus/Scripts/*.cpp
+	${CMAKE_SOURCE_DIR}/src/game/ClassicPlus/Scripts/*.h
+)
+list(APPEND game_SRCS ${ACTION_SCRIPTS})
+
 if(USE_ANTICHEAT)
   list(APPEND game_SRCS
       Anticheat/MovementAnticheat/MovementAnticheat.cpp
@@ -486,6 +500,8 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/AuctionHouse
   ${CMAKE_CURRENT_SOURCE_DIR}/Battlegrounds
   ${CMAKE_CURRENT_SOURCE_DIR}/Chat
+  ${CMAKE_CURRENT_SOURCE_DIR}/ClassicPlus
+  ${CMAKE_CURRENT_SOURCE_DIR}/ClassicPlus/Scripts
   ${CMAKE_CURRENT_SOURCE_DIR}/Commands
   ${CMAKE_CURRENT_SOURCE_DIR}/Database
   ${CMAKE_CURRENT_SOURCE_DIR}/Group
