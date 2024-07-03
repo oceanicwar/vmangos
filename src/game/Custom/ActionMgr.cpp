@@ -130,3 +130,30 @@ void ActionMgr::ActionOnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage
         script->OnUnitDamage(aggressor, victim, damage, cleanDamage, damagetype, damageSchoolMask, spellProto, durabilityLoss, spell, reflected);
     }
 }
+
+uint32 ActionMgr::ActionOnSendSpellDamageLog(SpellNonMeleeDamage const* log)
+{
+    auto it = actionScripts.find(ACTION_ON_SEND_SPELL_DAMAGE_LOG);
+    if (it == actionScripts.end())
+    {
+        return 0;
+    }
+
+    auto scripts = it->second;
+    if (scripts.empty())
+    {
+        return 0;
+    }
+
+    uint32 newDamage = 0;
+    for (auto& script : scripts)
+    {
+        auto damage = script->OnSendSpellDamageLog(log);
+        if (damage)
+        {
+            newDamage = damage;
+        }
+    }
+
+    return newDamage;
+}

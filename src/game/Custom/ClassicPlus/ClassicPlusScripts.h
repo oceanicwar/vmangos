@@ -10,6 +10,7 @@ public:
 
 public:
     void OnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected) override;
+    uint32 OnSendSpellDamageLog(SpellNonMeleeDamage const* log) override;
 };
 
 #endif

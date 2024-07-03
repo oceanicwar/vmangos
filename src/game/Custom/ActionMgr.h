@@ -25,6 +25,9 @@ public:
     // Triggered when the core checks if a spell fits the class and race for a player.
     virtual bool OnPlayerIsSpellFitByClassAndRace(const Player* player, uint32 spellId) { return false; }
 
+    // Triggered when the core sends damage logs to a player.
+    virtual uint32 OnSendSpellDamageLog(SpellNonMeleeDamage const* log) { return 0; }
+
     /* ====================================================== */
 
     /* ===================== UNIT HOOKS ===================== */
@@ -50,8 +53,9 @@ enum ActionTypes : uint32
     ACTION_ON_PLAYER_SPELL_FIT_CLASS_RACE = 2,
 
     ACTION_ON_UNIT_DAMAGE = 3,
+    ACTION_ON_SEND_SPELL_DAMAGE_LOG = 4,
 
-    ACTION_TYPES_END = 4
+    ACTION_TYPES_END = 5
 };
 
 class ActionMgr
@@ -68,6 +72,7 @@ public:
     bool ActionOnPlayerIsSpellFitByClassAndRace(const Player* player, uint32 spellId);
 
     void ActionOnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected);
+    uint32 ActionOnSendSpellDamageLog(SpellNonMeleeDamage const* log);
 
 private:
     std::map<uint32, std::vector<ActionScript*>> actionScripts;

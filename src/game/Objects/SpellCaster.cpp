@@ -27,6 +27,8 @@
 #include "WorldPacket.h"
 #include "Opcodes.h"
 
+#include "Custom/ActionMgr.h"
+
 Unit* SpellCaster::SelectMagnetTarget(Unit* victim, Spell* spell, SpellEffectIndex eff)
 {
     if (!victim)
@@ -808,6 +810,8 @@ void SpellCaster::SendEnergizeSpellLog(Unit const* pVictim, uint32 SpellID, uint
 
 void SpellCaster::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage const* log) const
 {
+    uint32 newValue = sActionMgr.ActionOnSendSpellDamageLog(log);
+
     WorldPacket data(SMSG_SPELLNONMELEEDAMAGELOG, (16 + 4 + 4 + 1 + 4 + 4 + 1 + 1 + 4 + 4 + 1)); // we guess size
 #if SUPPORTED_CLIENT_BUILD > CLIENT_BUILD_1_8_4
     data << log->target->GetPackGUID();
@@ -817,7 +821,7 @@ void SpellCaster::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage const* log) con
     data << log->attacker->GetGUID();
 #endif
     data << uint32(log->SpellID);
-    data << uint32(log->damage);                            // damage amount
+    data << uint32(newValue ? newValue : log->damage);                            // damage amount
     data << uint8(log->school);                             // damage school
     data << uint32(log->absorb);                            // AbsorbedDamage
     data << int32(log->resist);                             // resist
@@ -844,6 +848,7 @@ void SpellCaster::SendSpellNonMeleeDamageLog(Unit const* target, uint32 spellId,
         log.HitInfo |= SPELL_HIT_TYPE_CRIT;
     if (split)
         log.HitInfo |= SPELL_HIT_TYPE_SPLIT;
+
     SendSpellNonMeleeDamageLog(&log);
 }
 
