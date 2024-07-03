@@ -13,15 +13,10 @@ void ClassicPlusScripts::OnUnitDamage(Unit* aggressor, Unit* victim, uint32& dam
         return;
     }
 
-    uint32 crusaderStrike = 2537; /* Crusader Strike - Rank 1 */
-    if (spellProto->Id != crusaderStrike)
+    if (IsCrusaderStrike(spellProto->Id))
     {
-        return;
+        damage = GetCrusaderStrikeDamage(player, damage);
     }
-
-    // Double the damage of Crusader Strike - Rank 1, maybe scale this with weapon damage later?
-    uint32 newDamage = damage * 2;
-    damage = newDamage;
 }
 
 uint32 ClassicPlusScripts::OnSendSpellDamageLog(SpellNonMeleeDamage const* log)
@@ -42,13 +37,27 @@ uint32 ClassicPlusScripts::OnSendSpellDamageLog(SpellNonMeleeDamage const* log)
         return 0;
     }
 
-    uint32 crusaderStrike = 2537; /* Crusader Strike - Rank 1 */
-    if (log->SpellID != crusaderStrike)
+    if (IsCrusaderStrike(log->SpellID))
     {
-        return 0;
+        return GetCrusaderStrikeDamage(player, log->damage);
     }
 
-    // Double the damage of Crusader Strike - Rank 1, maybe scale this with weapon damage later?
-    uint32 newDamage = log->damage * 2;
-    return newDamage;
+    return 0;
+}
+
+bool ClassicPlusScripts::IsCrusaderStrike(uint32 spellId)
+{
+    return spellId == 2537 ||   /* Rank 1 */
+           spellId == 8823 ||   /* Rank 2 */
+           spellId == 8824 ||   /* Rank 3 */
+           spellId == 10336 ||  /* Rank 4 */
+           spellId == 10337;    /* Rank 5 */
+}
+
+uint32 ClassicPlusScripts::GetCrusaderStrikeDamage(Player* player, uint32 originalDamage)
+{
+    float minDmg = player->GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE);
+    float maxDmg = player->GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE);
+
+    return originalDamage + urand(minDmg, maxDmg);
 }
