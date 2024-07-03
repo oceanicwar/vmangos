@@ -1,11 +1,11 @@
 #include "ActionMgr.h"
 
-#include "PlayerActionScript.h"
+#include "ClassicPlus/ClassicPlusScripts.h"
 
 // Register your action scripts using this function.
 void ActionMgr::Inititalize()
 {
-    sActionMgr.RegisterActions(new PlayerActionScript(), {
+    sActionMgr.RegisterActions(new ClassicPlusScripts(), {
         ACTION_ON_UNIT_DAMAGE
     });
 }

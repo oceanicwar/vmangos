@@ -31,7 +31,7 @@
 #include "GameObject.h"
 #include "Map.h"
 
-#include "ActionMgr.h"
+#include "Custom/ActionMgr.h"
 
 using namespace Spells;
 
