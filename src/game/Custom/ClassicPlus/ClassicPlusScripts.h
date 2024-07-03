@@ -3,14 +3,21 @@
 
 #include "ActionMgr.h"
 
+enum ClassicPlusConstants {
+    CPLUS_MAP_MOLTEN_CORE = 409,
+
+    CPLUS_MAP_DATA_FLEX = 5000
+};
+
 class ClassicPlusScripts : public ActionScript
 {
 public:
     ClassicPlusScripts() : ActionScript("ClassicPlusScripts") { }
 
 public:
-    void OnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected) override;
-    uint32 OnSendSpellDamageLog(SpellNonMeleeDamage const* log) override;
+    void OnInitializeActionScript() override;
+    void OnPlayerEnterMap(Player* player, Map* oldMap, Map* newMap) override;
+    void OnCreatureUpdate(Creature* creature, uint32 update_diff, uint32 diff) override;
 };
 
 #endif

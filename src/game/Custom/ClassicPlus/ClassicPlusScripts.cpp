@@ -1,11 +1,42 @@
 #include "ClassicPlusScripts.h"
 
-void ClassicPlusScripts::OnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected)
+#include "InstanceData.h"
+
+void ClassicPlusScripts::OnInitializeActionScript()
 {
-    return;
+    // TODO: Load flexible templates here.
 }
 
-uint32 ClassicPlusScripts::OnSendSpellDamageLog(SpellNonMeleeDamage const* log)
+void ClassicPlusScripts::OnPlayerEnterMap(Player* player, Map* oldMap, Map* newMap)
 {
-    return 0;
+    if (!player || !newMap)
+    {
+        return;
+    }
+
+    uint32 mapId = newMap->GetId();
+    uint32 oldMapId = oldMap ? oldMap->GetId() : 1337;
+
+    sLog.Out(LOG_BASIC, LOG_LVL_ERROR, "Player '%s' entered map '%u' from old map '%u'.", player->GetName(), mapId, oldMapId);
+}
+
+void ClassicPlusScripts::OnCreatureUpdate(Creature* creature, uint32 update_diff, uint32 diff)
+{
+    if (!creature)
+    {
+        return;
+    }
+
+    auto map = creature->GetMap();
+    if (!map)
+    {
+        return;
+    }
+
+    if (!map->IsDungeon() && !map->IsRaid())
+    {
+        return;
+    }
+
+    // TODO: Modify creatures stats based on flexible scaling level
 }

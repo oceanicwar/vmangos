@@ -14,6 +14,13 @@ public:
         _name = name;
     }
 
+    /* ==================== SCRIPT HOOKS ==================== */
+
+    // Triggered when the world settings are initially loaded.
+    virtual void OnInitializeActionScript() { }
+
+    /* ====================================================== */
+
     /* ==================== PLAYER HOOKS ==================== */
 
     // Triggered when a player uses an item.
@@ -28,12 +35,21 @@ public:
     // Triggered when the core sends damage logs to a player.
     virtual uint32 OnSendSpellDamageLog(SpellNonMeleeDamage const* log) { return 0; }
 
+    // Triggered when a player enters a map.
+    virtual void OnPlayerEnterMap(Player* player, Map* oldMap, Map* newMap) { }
+
     /* ====================================================== */
 
     /* ===================== UNIT HOOKS ===================== */
 
     // Triggered after the calculations for damage have passed when a unit deals damage to another unit.
     virtual void OnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected) { }
+
+    /* ====================================================== */
+
+    /* =================== CREATURE HOOKS =================== */
+
+    virtual void OnCreatureUpdate(Creature* creature, uint32 update_diff, uint32 diff) { }
 
     /* ====================================================== */
 
@@ -51,11 +67,17 @@ enum ActionTypes : uint32
     ACTION_ON_PLAYER_USE_ITEM = 0,
     ACTION_ON_PLAYER_CAST_SPELL = 1,
     ACTION_ON_PLAYER_SPELL_FIT_CLASS_RACE = 2,
+    ACTION_ON_PLAYER_ENTER_MAP = 3,
 
-    ACTION_ON_UNIT_DAMAGE = 3,
-    ACTION_ON_SEND_SPELL_DAMAGE_LOG = 4,
+    ACTION_ON_UNIT_DAMAGE = 4,
 
-    ACTION_TYPES_END = 5
+    ACTION_ON_CREATURE_UPDATE = 5,
+
+    ACTION_ON_SEND_SPELL_DAMAGE_LOG = 6,
+
+    ACTION_ON_ACTIONSCRIPT_INITIALIZE = 7,
+
+    ACTION_TYPES_END = 8
 };
 
 class ActionMgr
@@ -70,8 +92,14 @@ public:
     void ActionOnPlayerUseItem(Player* player, Item* item);
     void ActionOnPlayerCastSpell(Player* player, Spell* spell);
     bool ActionOnPlayerIsSpellFitByClassAndRace(const Player* player, uint32 spellId);
+    void ActionOnPlayerEnterMap(Player* player, Map* oldMap, Map* newMap);
 
     void ActionOnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected);
+
+    void ActionOnCreatureUpdate(Creature* creature, uint32 update_diff, uint32 diff);
+
+    void ActionOnInitializeActionScript();
+
     uint32 ActionOnSendSpellDamageLog(SpellNonMeleeDamage const* log);
 
 private:

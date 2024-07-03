@@ -57,6 +57,8 @@
 #include "CreatureGroups.h"
 #include "Geometry.h"
 
+#include "Custom/ActionMgr.h"
+
 Map::~Map()
 {
     UnloadAll(true);
@@ -402,6 +404,8 @@ void Map::LoadGrid(Cell const& cell, bool no_unload)
 
 bool Map::Add(Player* player)
 {
+    sActionMgr.ActionOnPlayerEnterMap(player, player->GetMap(), this);
+
     player->GetMapRef().link(this, player);
     player->SetMap(this);
 
@@ -436,6 +440,7 @@ bool Map::Add(Player* player)
     player->SetSplineDonePending(false);
     player->GetSession()->ClearIncomingPacketsByType(PACKET_PROCESS_MOVEMENT);
     player->m_broadcaster->SetInstanceId(GetInstanceId());
+
     return true;
 }
 

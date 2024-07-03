@@ -111,6 +111,26 @@ bool ActionMgr::ActionOnPlayerIsSpellFitByClassAndRace(const Player* player, uin
     return result;
 }
 
+void ActionMgr::ActionOnPlayerEnterMap(Player* player, Map* oldMap, Map* newMap)
+{
+    auto it = actionScripts.find(ACTION_ON_PLAYER_ENTER_MAP);
+    if (it == actionScripts.end())
+    {
+        return;
+    }
+
+    auto scripts = it->second;
+    if (scripts.empty())
+    {
+        return;
+    }
+
+    for (auto& script : scripts)
+    {
+        script->OnPlayerEnterMap(player, oldMap, newMap);
+    }
+}
+
 void ActionMgr::ActionOnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected)
 {
     auto it = actionScripts.find(ACTION_ON_UNIT_DAMAGE);
@@ -156,4 +176,44 @@ uint32 ActionMgr::ActionOnSendSpellDamageLog(SpellNonMeleeDamage const* log)
     }
 
     return newDamage;
+}
+
+void ActionMgr::ActionOnCreatureUpdate(Creature* creature, uint32 update_diff, uint32 diff)
+{
+    auto it = actionScripts.find(ACTION_ON_CREATURE_UPDATE);
+    if (it == actionScripts.end())
+    {
+        return;
+    }
+
+    auto scripts = it->second;
+    if (scripts.empty())
+    {
+        return;
+    }
+
+    for (auto& script : scripts)
+    {
+        script->OnCreatureUpdate(creature, update_diff, diff);
+    }
+}
+
+void ActionMgr::ActionOnInitializeActionScript()
+{
+    auto it = actionScripts.find(ACTION_ON_ACTIONSCRIPT_INITIALIZE);
+    if (it == actionScripts.end())
+    {
+        return;
+    }
+
+    auto scripts = it->second;
+    if (scripts.empty())
+    {
+        return;
+    }
+
+    for (auto& script : scripts)
+    {
+        script->OnInitializeActionScript();
+    }
 }

@@ -54,6 +54,8 @@
 #include "TemporarySummon.h"
 #include "GuardMgr.h"
 
+#include "Custom/ActionMgr.h"
+
 TrainerSpell const* TrainerSpellData::Find(uint32 spell_id) const
 {
     TrainerSpellMap::const_iterator itr = spellList.find(spell_id);
@@ -713,6 +715,8 @@ void Creature::Update(uint32 update_diff, uint32 diff)
 {
     update_diff *= sWorld.GetTimeRate();
     diff *= sWorld.GetTimeRate();
+
+    sActionMgr.ActionOnCreatureUpdate(this, update_diff, diff);
 
     // AI was locked and switch was delayed to next update.
     if (HasCreatureState(CSTATE_INIT_AI_ON_UPDATE))

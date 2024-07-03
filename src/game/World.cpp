@@ -82,6 +82,8 @@
 #include "GuardMgr.h"
 #include "TransportMgr.h"
 
+#include "Custom/ActionMgr.h"
+
 #include <chrono>
 
 INSTANTIATE_SINGLETON_1(World);
@@ -1746,6 +1748,10 @@ void World::SetInitialWorldSettings()
 
     sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "Initializing Scripts...");
     sScriptMgr.Initialize();
+    sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "");
+
+    sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "Initializing Action Scripts...");
+    sActionMgr.ActionOnInitializeActionScript();
     sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "");
 
     sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "Loading aura removal on map change definitions");
