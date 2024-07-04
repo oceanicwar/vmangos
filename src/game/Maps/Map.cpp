@@ -1200,6 +1200,8 @@ void ScriptedEvent::SendEventToAllTargets(uint32 uiData)
 
 void Map::Remove(Player* player, bool remove)
 {
+    sActionMgr.ActionOnPlayerExitMap(player, player->GetMap());
+
     if (i_data)
         i_data->OnPlayerLeave(player);
 

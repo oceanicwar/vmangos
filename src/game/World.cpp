@@ -1751,6 +1751,7 @@ void World::SetInitialWorldSettings()
     sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "");
 
     sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "Initializing Action Scripts...");
+    sActionMgr.Inititalize();
     sActionMgr.ActionOnInitializeActionScript();
     sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "");
 

@@ -131,6 +131,26 @@ void ActionMgr::ActionOnPlayerEnterMap(Player* player, Map* oldMap, Map* newMap)
     }
 }
 
+void ActionMgr::ActionOnPlayerExitMap(Player* player, Map* map)
+{
+    auto it = actionScripts.find(ACTION_ON_PLAYER_EXIT_MAP);
+    if (it == actionScripts.end())
+    {
+        return;
+    }
+
+    auto scripts = it->second;
+    if (scripts.empty())
+    {
+        return;
+    }
+
+    for (auto& script : scripts)
+    {
+        script->OnPlayerExitMap(player, map);
+    }
+}
+
 void ActionMgr::ActionOnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected)
 {
     auto it = actionScripts.find(ACTION_ON_UNIT_DAMAGE);

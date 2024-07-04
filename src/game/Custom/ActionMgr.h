@@ -38,6 +38,9 @@ public:
     // Triggered when a player enters a map.
     virtual void OnPlayerEnterMap(Player* player, Map* oldMap, Map* newMap) { }
 
+    // Triggered when a player exits a map.
+    virtual void OnPlayerExitMap(Player* player, Map* map) { }
+
     /* ====================================================== */
 
     /* ===================== UNIT HOOKS ===================== */
@@ -67,17 +70,19 @@ enum ActionTypes : uint32
     ACTION_ON_PLAYER_USE_ITEM = 0,
     ACTION_ON_PLAYER_CAST_SPELL = 1,
     ACTION_ON_PLAYER_SPELL_FIT_CLASS_RACE = 2,
+
     ACTION_ON_PLAYER_ENTER_MAP = 3,
+    ACTION_ON_PLAYER_EXIT_MAP = 4,
 
-    ACTION_ON_UNIT_DAMAGE = 4,
+    ACTION_ON_UNIT_DAMAGE = 5,
 
-    ACTION_ON_CREATURE_UPDATE = 5,
+    ACTION_ON_CREATURE_UPDATE = 6,
 
-    ACTION_ON_SEND_SPELL_DAMAGE_LOG = 6,
+    ACTION_ON_SEND_SPELL_DAMAGE_LOG = 7,
 
-    ACTION_ON_ACTIONSCRIPT_INITIALIZE = 7,
+    ACTION_ON_ACTIONSCRIPT_INITIALIZE = 8,
 
-    ACTION_TYPES_END = 8
+    ACTION_TYPES_END = 9
 };
 
 class ActionMgr
@@ -92,7 +97,9 @@ public:
     void ActionOnPlayerUseItem(Player* player, Item* item);
     void ActionOnPlayerCastSpell(Player* player, Spell* spell);
     bool ActionOnPlayerIsSpellFitByClassAndRace(const Player* player, uint32 spellId);
+
     void ActionOnPlayerEnterMap(Player* player, Map* oldMap, Map* newMap);
+    void ActionOnPlayerExitMap(Player* player, Map* map);
 
     void ActionOnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected);
 

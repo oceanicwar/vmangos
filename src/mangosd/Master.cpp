@@ -53,8 +53,6 @@
 #include <ace/Dev_Poll_Reactor.h>
 #include <signal.h>
 
-#include "Custom/ActionMgr.h"
-
 #ifdef WIN32
 #include "ServiceWin32.h"
 extern int m_ServiceStatus;
@@ -181,7 +179,6 @@ int Master::Run()
 
     // Initialize the World
     sWorld.SetInitialWorldSettings();
-    sActionMgr.Inititalize();
 
     #ifndef WIN32
     detachDaemon();
