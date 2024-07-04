@@ -46,7 +46,7 @@ void FlexibleInstancesScript::OnPlayerEnterMap(Player* player, Map* oldMap, Map*
         return;
     }
 
-    if (!newMap->IsDungeon() && !newMap->IsRaid())
+    if (!IsFlexibleInstance(newMap))
     {
         return;
     }
@@ -65,7 +65,7 @@ void FlexibleInstancesScript::OnPlayerExitMap(Player* player, Map* map)
         return;
     }
 
-    if (!map->IsDungeon() && !map->IsRaid())
+    if (!IsFlexibleInstance(map))
     {
         return;
     }
@@ -301,6 +301,10 @@ void FlexibleInstancesScript::UpdateFlexibility(Map* map)
     }
 
     auto flexTemplate = GetMultipliersForPlayerCount(mapId, playerCount);
+    if (!flexTemplate)
+    {
+        return;
+    }
 
     auto it = flexibleInstances.find(instanceId);
     if (it == flexibleInstances.end())
@@ -321,7 +325,6 @@ void FlexibleInstancesScript::UpdateFlexibility(Map* map)
 void FlexibleInstancesScript::NotifyFlexibilityChanged(Map* map, Player* skipPlayer)
 {
     auto flexInstance = GetFlexibleInstance(map);
-
     if (!flexInstance)
     {
         return;
