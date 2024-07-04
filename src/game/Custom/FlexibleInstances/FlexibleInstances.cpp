@@ -1,5 +1,6 @@
 #include "FlexibleInstances.h"
 
+#include "Chat.h"
 #include "InstanceData.h"
 
 void FlexibleInstancesScript::OnInitializeActionScript()
@@ -15,21 +16,21 @@ void FlexibleInstancesScript::OnInitializeActionScript()
         {
             auto fields = result->Fetch();
 
-            FlexibleInstance flexInstance;
-            flexInstance.MapId = fields[0].GetUInt32();
-            flexInstance.PlayerCount = fields[1].GetUInt32();
-            flexInstance.HealthMultiplier = fields[2].GetFloat();
-            flexInstance.DamageMultiplier = fields[3].GetFloat();
+            FlexibleInstanceTemplate flexTemplate;
+            flexTemplate.MapId = fields[0].GetUInt32();
+            flexTemplate.PlayerCount = fields[1].GetUInt32();
+            flexTemplate.HealthMultiplier = fields[2].GetFloat();
+            flexTemplate.DamageMultiplier = fields[3].GetFloat();
 
-            auto it = flexibleInstanceTemplates.find(flexInstance.MapId);
+            auto it = flexibleInstanceTemplates.find(flexTemplate.MapId);
             if (it == flexibleInstanceTemplates.end())
             {
-                std::unordered_map<uint32, FlexibleInstance> instanceMap;
-                flexibleInstanceTemplates.emplace(flexInstance.MapId, instanceMap);
+                std::unordered_map<uint32, FlexibleInstanceTemplate> instanceMap;
+                flexibleInstanceTemplates.emplace(flexTemplate.MapId, instanceMap);
             }
 
-            it = flexibleInstanceTemplates.find(flexInstance.MapId);
-            it->second.emplace(flexInstance.PlayerCount, flexInstance);
+            it = flexibleInstanceTemplates.find(flexTemplate.MapId);
+            it->second.emplace(flexTemplate.PlayerCount, flexTemplate);
 
             count++;
         } while (result->NextRow());
@@ -51,6 +52,9 @@ void FlexibleInstancesScript::OnPlayerEnterMap(Player* player, Map* oldMap, Map*
     }
     
     AddPlayerToInstance(newMap->GetInstanceId(), player);
+    UpdateFlexibility(newMap);
+    NotifyFlexibilityChanged(newMap);
+
     sLog.Out(LOG_BASIC, LOG_LVL_BASIC, "Player '%s' entered instance map '%u'.", player->GetName(), newMap->GetId());
 }
 
@@ -67,6 +71,9 @@ void FlexibleInstancesScript::OnPlayerExitMap(Player* player, Map* map)
     }
 
     RemovePlayerFromInstance(map->GetInstanceId(), player);
+    UpdateFlexibility(map);
+    NotifyFlexibilityChanged(map, player);
+
     sLog.Out(LOG_BASIC, LOG_LVL_BASIC, "Player '%s' left instance map '%u'.", player->GetName(), map->GetId());
 }
 
@@ -106,22 +113,9 @@ void FlexibleInstancesScript::OnCreatureUpdate(Creature* creature, uint32 update
         return;
     }
 
-    uint32 mapId = map->GetId();
-    uint32 instanceId = map->GetInstanceId();
-
-    uint32 playerCount = GetPlayerCountForInstance(instanceId);
-
-    // There are no players in the instance.
-    if (!playerCount)
+    auto flexInstance = GetFlexibleInstance(map);
+    if (!flexInstance || !flexInstance->Template)
     {
-        return;
-    }
-
-    auto multipliers = GetMultipliersForPlayerCount(mapId, playerCount);
-
-    if (!multipliers)
-    {
-        // No template was found, leave at last scaling value.
         return;
     }
 
@@ -131,7 +125,7 @@ void FlexibleInstancesScript::OnCreatureUpdate(Creature* creature, uint32 update
     auto creatureCLS = creature->GetClassLevelStats();
 
     float const healthMod = creature->_GetHealthMod(rank);
-    uint32 const health = std::max(1u, uint32(roundf(healthMod * creatureCLS->health * creatureInfo->health_multiplier * multipliers->HealthMultiplier)));
+    uint32 const health = std::max(1u, uint32(roundf(healthMod * creatureCLS->health * creatureInfo->health_multiplier * flexInstance->Template->HealthMultiplier)));
 
     creature->SetMaxHealth(health);
 }
@@ -165,26 +159,13 @@ void FlexibleInstancesScript::OnUnitDamage(Unit* aggressor, Unit* victim, uint32
         return;
     }
 
-    uint32 mapId = map->GetId();
-    uint32 instanceId = map->GetInstanceId();
-
-    uint32 playerCount = GetPlayerCountForInstance(instanceId);
-
-    // There are no players in the instance.
-    if (!playerCount)
+    auto flexInstance = GetFlexibleInstance(map);
+    if (!flexInstance || !flexInstance->Template)
     {
         return;
     }
 
-    auto multipliers = GetMultipliersForPlayerCount(mapId, playerCount);
-
-    if (!multipliers)
-    {
-        // No template was found, leave at last scaling value.
-        return;
-    }
-
-    uint32 newDamage = std::max(1u, uint32(roundf(damage * multipliers->DamageMultiplier)));
+    uint32 newDamage = std::max(1u, uint32(roundf(damage * flexInstance->Template->DamageMultiplier)));
     damage = newDamage;
 }
 
@@ -220,26 +201,13 @@ uint32 FlexibleInstancesScript::OnSendSpellDamageLog(SpellNonMeleeDamage const* 
         return 0;
     }
 
-    uint32 mapId = map->GetId();
-    uint32 instanceId = map->GetInstanceId();
-
-    uint32 playerCount = GetPlayerCountForInstance(instanceId);
-
-    // There are no players in the instance.
-    if (!playerCount)
+    auto flexInstance = GetFlexibleInstance(map);
+    if (!flexInstance || !flexInstance->Template)
     {
         return 0;
     }
 
-    auto multipliers = GetMultipliersForPlayerCount(mapId, playerCount);
-
-    if (!multipliers)
-    {
-        // No template was found, leave at last scaling value.
-        return 0;
-    }
-
-    return std::max(1u, uint32(roundf(log->damage * multipliers->DamageMultiplier)));
+    return std::max(1u, uint32(roundf(log->damage * flexInstance->Template->DamageMultiplier)));
 }
 
 uint32 FlexibleInstancesScript::OnSendAttackStateUpdate(CalcDamageInfo const* log)
@@ -274,29 +242,16 @@ uint32 FlexibleInstancesScript::OnSendAttackStateUpdate(CalcDamageInfo const* lo
         return 0;
     }
 
-    uint32 mapId = map->GetId();
-    uint32 instanceId = map->GetInstanceId();
-
-    uint32 playerCount = GetPlayerCountForInstance(instanceId);
-
-    // There are no players in the instance.
-    if (!playerCount)
+    auto flexInstance = GetFlexibleInstance(map);
+    if (!flexInstance || !flexInstance->Template)
     {
         return 0;
     }
 
-    auto multipliers = GetMultipliersForPlayerCount(mapId, playerCount);
-
-    if (!multipliers)
-    {
-        // No template was found, leave at last scaling value.
-        return 0;
-    }
-
-    return std::max(1u, uint32(roundf(log->totalDamage * multipliers->DamageMultiplier)));
+    return std::max(1u, uint32(roundf(log->totalDamage * flexInstance->Template->DamageMultiplier)));
 }
 
-const FlexibleInstance* FlexibleInstancesScript::GetMultipliersForPlayerCount(uint32 mapId, uint32 playerCount)
+const FlexibleInstanceTemplate* FlexibleInstancesScript::GetMultipliersForPlayerCount(uint32 mapId, uint32 playerCount)
 {
     // Find templates for map.
     auto it = flexibleInstanceTemplates.find(mapId);
@@ -306,7 +261,7 @@ const FlexibleInstance* FlexibleInstancesScript::GetMultipliersForPlayerCount(ui
     }
 
     // Find the closest template for player count.
-    const FlexibleInstance* selectedTemplate = nullptr;
+    const FlexibleInstanceTemplate* selectedTemplate = nullptr;
 
     for (auto const& it2 : it->second)
     {
@@ -326,6 +281,79 @@ const FlexibleInstance* FlexibleInstancesScript::GetMultipliersForPlayerCount(ui
     }
 
     return selectedTemplate;
+}
+
+void FlexibleInstancesScript::UpdateFlexibility(Map* map)
+{
+    uint32 mapId = map->GetId();
+    uint32 instanceId = map->GetInstanceId();
+    uint32 playerCount = GetPlayerCountForInstance(instanceId);
+
+    // There are no players in the instance.
+    if (!playerCount)
+    {
+        return;
+    }
+
+    auto flexTemplate = GetMultipliersForPlayerCount(mapId, playerCount);
+
+    auto it = flexibleInstances.find(instanceId);
+    if (it == flexibleInstances.end())
+    {
+        return;
+    }
+
+    // Template already in effect.
+    if (it->second.Template->PlayerCount == flexTemplate->PlayerCount)
+    {
+        return;
+    }
+
+    it->second.Template = flexTemplate;
+    it->second.NotifiedPlayers = false;
+}
+
+void FlexibleInstancesScript::NotifyFlexibilityChanged(Map* map, Player* skipPlayer)
+{
+    auto flexInstance = GetFlexibleInstance(map);
+
+    if (!flexInstance)
+    {
+        return;
+    }
+
+    Map::PlayerList const& players = map->GetPlayers();
+    for (const auto& playerRef : players)
+    {
+        auto player = playerRef.getSource();
+        if (!player)
+        {
+            continue;
+        }
+
+        // If the player is leaving the map they probably dont need to be notified.
+        if (skipPlayer && skipPlayer->GetGUID() == player->GetGUID())
+        {
+            continue;
+        }
+
+        ChatHandler(player->GetSession()).PSendSysMessage("|cff00FF00[Flexible Instances]: |cffFFFFFFInstance scaled to %u player(s).", flexInstance->Template->PlayerCount);
+    }
+
+    flexInstance->NotifiedPlayers = true;
+}
+
+FlexibleInstance* FlexibleInstancesScript::GetFlexibleInstance(Map* map)
+{
+    uint32 instanceId = map->GetInstanceId();
+
+    auto it = flexibleInstances.find(instanceId);
+    if (it == flexibleInstances.end())
+    {
+        return nullptr;
+    }
+
+    return &it->second;
 }
 
 bool FlexibleInstancesScript::IsFlexibleInstance(Map* map)
@@ -348,22 +376,24 @@ void FlexibleInstancesScript::AddPlayerToInstance(uint32 instanceId, Player* pla
     auto it = flexibleInstances.find(instanceId);
     if (it == flexibleInstances.end())
     {
-        std::unordered_set<uint64> players;
-        players.emplace(player->GetGUID());
+        FlexibleInstance flexInstance;
+        flexibleInstances.emplace(instanceId, flexInstance);
+    }
 
-        flexibleInstances.emplace(instanceId, players);
-
+    it = flexibleInstances.find(instanceId);
+    if (it == flexibleInstances.end())
+    {
         return;
     }
 
-    auto it2 = it->second.find(player->GetGUID());
-    if (it2 != it->second.end())
+    auto it2 = it->second.Players.find(player->GetGUID());
+    if (it2 != it->second.Players.end())
     {
         // Player already exists in instance.
         return;
     }
 
-    it->second.emplace(player->GetGUID());
+    it->second.Players.emplace(player->GetGUID());
 }
 
 void FlexibleInstancesScript::RemovePlayerFromInstance(uint32 instanceId, Player* player)
@@ -375,14 +405,14 @@ void FlexibleInstancesScript::RemovePlayerFromInstance(uint32 instanceId, Player
         return;
     }
 
-    auto it2 = it->second.find(player->GetGUID());
-    if (it2 == it->second.end())
+    auto it2 = it->second.Players.find(player->GetGUID());
+    if (it2 == it->second.Players.end())
     {
         // Player is not inside the instance.
         return;
     }
 
-    it->second.erase(it2);
+    it->second.Players.erase(it2);
 }
 
 uint32 FlexibleInstancesScript::GetPlayerCountForInstance(uint32 instanceId)
@@ -394,5 +424,5 @@ uint32 FlexibleInstancesScript::GetPlayerCountForInstance(uint32 instanceId)
         return 0;
     }
 
-    return it->second.size();
+    return it->second.Players.size();
 }

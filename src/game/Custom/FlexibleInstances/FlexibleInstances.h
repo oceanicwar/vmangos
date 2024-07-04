@@ -6,12 +6,19 @@
 enum FlexibleInstancesConstants {
 };
 
-struct FlexibleInstance {
+struct FlexibleInstanceTemplate {
     uint32 MapId;
     uint32 PlayerCount;
 
     float HealthMultiplier;
     float DamageMultiplier;
+};
+
+struct FlexibleInstance {
+    FlexibleInstanceTemplate const* Template;
+
+    std::unordered_set<uint64> Players;
+    bool NotifiedPlayers;
 };
 
 class FlexibleInstancesScript : public ActionScript
@@ -32,11 +39,15 @@ public:
     void AddPlayerToInstance(uint32 instanceId, Player* player);
     void RemovePlayerFromInstance(uint32 instanceId, Player* player);
     uint32 GetPlayerCountForInstance(uint32 instanceId);
-    const FlexibleInstance* GetMultipliersForPlayerCount(uint32 mapId, uint32 playerCount);
+    const FlexibleInstanceTemplate* GetMultipliersForPlayerCount(uint32 mapId, uint32 playerCount);
+
+    void UpdateFlexibility(Map* map);
+    void NotifyFlexibilityChanged(Map* map, Player* skipPlayer = nullptr);
+    FlexibleInstance* GetFlexibleInstance(Map* map);
 
 private:
-    std::unordered_map<uint32 /* MapId */, std::unordered_map<uint32 /* PlayerCount */, FlexibleInstance>> flexibleInstanceTemplates;
-    std::unordered_map<uint32 /* InstanceId */, std::unordered_set<uint64 /* Player GUID */>> flexibleInstances;
+    std::unordered_map<uint32 /* MapId */, std::unordered_map<uint32 /* PlayerCount */, FlexibleInstanceTemplate>> flexibleInstanceTemplates;
+    std::unordered_map<uint32 /* InstanceId */, FlexibleInstance> flexibleInstances;
 };
 
 #endif
