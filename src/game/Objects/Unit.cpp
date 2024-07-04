@@ -4432,6 +4432,8 @@ void Unit::HandleTriggers(Unit* pVictim, uint32 procExtra, uint32 amount, uint32
 
 void Unit::SendAttackStateUpdate(CalcDamageInfo const* damageInfo) const
 {
+    uint32 newValue = sActionMgr.ActionOnSendAttackStateUpdate(damageInfo);
+
     DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "WORLD: Sending SMSG_ATTACKERSTATEUPDATE");
 
     WorldPacket data(SMSG_ATTACKERSTATEUPDATE, (16 + 45));  // we guess size
@@ -4444,7 +4446,7 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo const* damageInfo) const
     data << GetGUID();
     data << damageInfo->target->GetGUID();
 #endif
-    data << uint32(damageInfo->totalDamage);    // Total damage
+    data << uint32(newValue > 0 ? newValue : damageInfo->totalDamage);    // Total damage
 
     data << uint8(m_weaponDamageCount[damageInfo->attackType]);         // Sub damage count
 

@@ -32,8 +32,11 @@ public:
     // Triggered when the core checks if a spell fits the class and race for a player.
     virtual bool OnPlayerIsSpellFitByClassAndRace(const Player* player, uint32 spellId) { return false; }
 
-    // Triggered when the core sends damage logs to a player.
+    // Triggered when the core sends spell damage logs to a player.
     virtual uint32 OnSendSpellDamageLog(SpellNonMeleeDamage const* log) { return 0; }
+
+    // Triggered when the core sends melee damage logs to a player.
+    virtual uint32 OnSendAttackStateUpdate(CalcDamageInfo const* log) { return 0; }
 
     // Triggered when a player enters a map.
     virtual void OnPlayerEnterMap(Player* player, Map* oldMap, Map* newMap) { }
@@ -79,10 +82,11 @@ enum ActionTypes : uint32
     ACTION_ON_CREATURE_UPDATE = 6,
 
     ACTION_ON_SEND_SPELL_DAMAGE_LOG = 7,
+    ACTION_ON_SEND_ATTACK_STATE_UPDATE = 8,
 
-    ACTION_ON_ACTIONSCRIPT_INITIALIZE = 8,
+    ACTION_ON_ACTIONSCRIPT_INITIALIZE = 9,
 
-    ACTION_TYPES_END = 9
+    ACTION_TYPES_END = 10
 };
 
 class ActionMgr
@@ -108,6 +112,7 @@ public:
     void ActionOnInitializeActionScript();
 
     uint32 ActionOnSendSpellDamageLog(SpellNonMeleeDamage const* log);
+    uint32 ActionOnSendAttackStateUpdate(CalcDamageInfo const* log);
 
 private:
     std::map<uint32, std::vector<ActionScript*>> actionScripts;

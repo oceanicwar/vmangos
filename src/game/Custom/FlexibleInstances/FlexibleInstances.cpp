@@ -122,7 +122,6 @@ void FlexibleInstancesScript::OnCreatureUpdate(Creature* creature, uint32 update
     if (!multipliers)
     {
         // No template was found, leave at last scaling value.
-        sLog.Out(LOG_BASIC, LOG_LVL_ERROR, "No flexible instance template was suitable for player count '%u' and map '%u'.", playerCount, mapId);
         return;
     }
 
@@ -135,6 +134,166 @@ void FlexibleInstancesScript::OnCreatureUpdate(Creature* creature, uint32 update
     uint32 const health = std::max(1u, uint32(roundf(healthMod * creatureCLS->health * creatureInfo->health_multiplier * multipliers->HealthMultiplier)));
 
     creature->SetMaxHealth(health);
+}
+
+void FlexibleInstancesScript::OnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected)
+{
+    if (!aggressor || !victim)
+    {
+        return;
+    }
+
+    if (aggressor->IsPlayer() || !aggressor->IsCreature())
+    {
+        return;
+    }
+
+    auto creature = aggressor->ToCreature();
+    if (!creature)
+    {
+        return;
+    }
+
+    auto map = creature->GetMap();
+    if (!map)
+    {
+        return;
+    }
+
+    if (!IsFlexibleInstance(map))
+    {
+        return;
+    }
+
+    uint32 mapId = map->GetId();
+    uint32 instanceId = map->GetInstanceId();
+
+    uint32 playerCount = GetPlayerCountForInstance(instanceId);
+
+    // There are no players in the instance.
+    if (!playerCount)
+    {
+        return;
+    }
+
+    auto multipliers = GetMultipliersForPlayerCount(mapId, playerCount);
+
+    if (!multipliers)
+    {
+        // No template was found, leave at last scaling value.
+        return;
+    }
+
+    uint32 newDamage = std::max(1u, uint32(roundf(damage * multipliers->DamageMultiplier)));
+    damage = newDamage;
+}
+
+uint32 FlexibleInstancesScript::OnSendSpellDamageLog(SpellNonMeleeDamage const* log)
+{
+    auto aggressor = log->attacker;
+    auto victim = log->target;
+    
+    if (!aggressor || !victim)
+    {
+        return 0;
+    }
+
+    if (aggressor->IsPlayer() || !aggressor->IsCreature())
+    {
+        return 0;
+    }
+
+    auto creature = aggressor->ToCreature();
+    if (!creature)
+    {
+        return 0;
+    }
+
+    auto map = creature->GetMap();
+    if (!map)
+    {
+        return 0;
+    }
+
+    if (!IsFlexibleInstance(map))
+    {
+        return 0;
+    }
+
+    uint32 mapId = map->GetId();
+    uint32 instanceId = map->GetInstanceId();
+
+    uint32 playerCount = GetPlayerCountForInstance(instanceId);
+
+    // There are no players in the instance.
+    if (!playerCount)
+    {
+        return 0;
+    }
+
+    auto multipliers = GetMultipliersForPlayerCount(mapId, playerCount);
+
+    if (!multipliers)
+    {
+        // No template was found, leave at last scaling value.
+        return 0;
+    }
+
+    return std::max(1u, uint32(roundf(log->damage * multipliers->DamageMultiplier)));
+}
+
+uint32 FlexibleInstancesScript::OnSendAttackStateUpdate(CalcDamageInfo const* log)
+{
+    auto aggressor = log->attacker;
+    auto victim = log->target;
+
+    if (!aggressor || !victim)
+    {
+        return 0;
+    }
+
+    if (aggressor->IsPlayer() || !aggressor->IsCreature())
+    {
+        return 0;
+    }
+
+    auto creature = aggressor->ToCreature();
+    if (!creature)
+    {
+        return 0;
+    }
+
+    auto map = creature->GetMap();
+    if (!map)
+    {
+        return 0;
+    }
+
+    if (!IsFlexibleInstance(map))
+    {
+        return 0;
+    }
+
+    uint32 mapId = map->GetId();
+    uint32 instanceId = map->GetInstanceId();
+
+    uint32 playerCount = GetPlayerCountForInstance(instanceId);
+
+    // There are no players in the instance.
+    if (!playerCount)
+    {
+        return 0;
+    }
+
+    auto multipliers = GetMultipliersForPlayerCount(mapId, playerCount);
+
+    if (!multipliers)
+    {
+        // No template was found, leave at last scaling value.
+        return 0;
+    }
+
+    return std::max(1u, uint32(roundf(log->totalDamage * multipliers->DamageMultiplier)));
 }
 
 const FlexibleInstance* FlexibleInstancesScript::GetMultipliersForPlayerCount(uint32 mapId, uint32 playerCount)
