@@ -127,6 +127,11 @@ void FlexibleInstancesScript::OnCreatureUpdate(Creature* creature, uint32 update
     float const healthMod = creature->_GetHealthMod(rank);
     uint32 const health = std::max(1u, uint32(roundf(healthMod * creatureCLS->health * creatureInfo->health_multiplier * flexInstance->Template->HealthMultiplier)));
 
+    if (creature->GetMaxHealth() == health)
+    {
+        return;
+    }
+
     creature->SetMaxHealth(health);
 }
 
