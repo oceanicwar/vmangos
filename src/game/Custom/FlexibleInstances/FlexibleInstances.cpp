@@ -342,7 +342,7 @@ void FlexibleInstancesScript::NotifyFlexibilityChanged(Map* map, Player* skipPla
             continue;
         }
 
-        ChatHandler(player->GetSession()).PSendSysMessage("|cff00FF00[Flexible Instances]: |cffFFFFFFInstance scaled to %u player(s).", flexInstance->Template->PlayerCount);
+        ChatHandler(player->GetSession()).PSendSysMessage("|cff00FF00[Flexible Instances]: |cffFFFFFFCreature damage and health has been adjusted for |cffFF0000%u|cffFFFFFF player(s).", flexInstance->Template->PlayerCount);
     }
 
     flexInstance->NotifiedPlayers = true;
