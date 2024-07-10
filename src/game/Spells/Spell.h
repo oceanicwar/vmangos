@@ -246,6 +246,7 @@ class Spell
         void EffectCreateItem(SpellEffectIndex effIdx);
         void EffectPersistentAA(SpellEffectIndex effIdx);
         void EffectEnergize(SpellEffectIndex effIdx);
+        void EffectEnergizePct(SpellEffectIndex effIdx);
         void EffectOpenLock(SpellEffectIndex effIdx);
         void EffectSummonChangeItem(SpellEffectIndex effIdx);
         void EffectProficiency(SpellEffectIndex effIdx);

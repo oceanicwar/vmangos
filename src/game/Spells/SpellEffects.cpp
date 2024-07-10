@@ -187,6 +187,12 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectApplyAreaAura,                            //129 SPELL_EFFECT_APPLY_AREA_AURA_ENEMY
     &Spell::EffectDespawnObject,                            //130 SPELL_EFFECT_DESPAWN_OBJECT
     &Spell::EffectNostalrius,                               //131 SPELL_EFFECT_NOSTALRIUS
+    &Spell::EffectUnused,                                   //132 SPELL_EFFECT_132
+    &Spell::EffectUnused,                                   //133 SPELL_EFFECT_133
+    &Spell::EffectUnused,                                   //134 SPELL_EFFECT_134
+    &Spell::EffectUnused,                                   //135 SPELL_EFFECT_135
+    &Spell::EffectUnused,                                   //136 SPELL_EFFECT_136
+    &Spell::EffectEnergizePct,                              //137 SPELL_EFFECT_ENERGIZE_PCT
 };
 
 void Spell::EffectEmpty(SpellEffectIndex /*effIdx*/)
@@ -2765,6 +2771,37 @@ void Spell::EffectEnergize(SpellEffectIndex effIdx)
 #endif
 
     m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, damage, power);
+}
+
+void Spell::EffectEnergizePct(SpellEffectIndex effIdx)
+{
+    if (!unitTarget)
+        return;
+    if (!unitTarget->IsAlive())
+        return;
+
+    if (m_spellInfo->EffectMiscValue[effIdx] < 0 || m_spellInfo->EffectMiscValue[effIdx] >= MAX_POWERS)
+        return;
+
+    Powers power = Powers(m_spellInfo->EffectMiscValue[effIdx]);
+
+    if (damage < 0)
+        return;
+
+    if (unitTarget->GetMaxPower(power) == 0)
+        return;
+
+    float percent = damage * 0.01;
+    uint32 newDamage = (uint32)round(unitTarget->GetMaxPower(power) * percent);
+
+#if SUPPORTED_CLIENT_BUILD <= CLIENT_BUILD_1_9_4
+    ExecuteLogInfo info(unitTarget->GetObjectGuid());
+    info.energize.amount = newDamage;
+    info.energize.powerType = power;
+    AddExecuteLogInfo(effIdx, info);
+#endif
+
+    m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, newDamage, power);
 }
 
 void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
