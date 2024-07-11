@@ -312,8 +312,16 @@ void FlexibleInstancesScript::UpdateFlexibility(Map* map)
         return;
     }
 
+    auto instanceTemplate = it->second.Template;
+    if (!instanceTemplate)
+    {
+        it->second.Template = flexTemplate;
+        it->second.NotifiedPlayers = false;
+        return;
+    }
+
     // Template already in effect.
-    if (it->second.Template->PlayerCount == flexTemplate->PlayerCount)
+    if (instanceTemplate->PlayerCount == flexTemplate->PlayerCount)
     {
         return;
     }
@@ -326,6 +334,11 @@ void FlexibleInstancesScript::NotifyFlexibilityChanged(Map* map, Player* skipPla
 {
     auto flexInstance = GetFlexibleInstance(map);
     if (!flexInstance)
+    {
+        return;
+    }
+
+    if (!flexInstance->Template)
     {
         return;
     }
