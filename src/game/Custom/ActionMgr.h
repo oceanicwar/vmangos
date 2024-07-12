@@ -6,6 +6,7 @@
 #include "Policies/Singleton.h"
 #include "Spell.h"
 
+// Used by the OnPlayerGainExperience hook to determine XP source.
 enum XPSource {
     XP_SOURCE_EXPLORATION = 0,
     XP_SOURCE_QUEST = 1,
@@ -50,7 +51,7 @@ public:
     // Triggered when a player exits a map.
     virtual void OnPlayerExitMap(Player* player, Map* map) { }
 
-    // Triggered when a player gains experience.
+    // Triggered when a player gains experience from various sources.
     virtual void OnPlayerGainExperience(Player* player, uint32& exp, XPSource source) { }
 
     /* ====================================================== */
@@ -64,12 +65,14 @@ public:
 
     /* =================== CREATURE HOOKS =================== */
 
+    // Triggered before the creature updates.
     virtual void OnCreatureUpdate(Creature* creature, uint32 update_diff, uint32 diff) { }
 
     /* ====================================================== */
 
     /* ===================== MISC HOOKS ===================== */
 
+    // Triggered when money is generated for loot.
     virtual void OnGenerateLootMoney(Loot* loot, uint32& money) { }
 
     /* ====================================================== */
