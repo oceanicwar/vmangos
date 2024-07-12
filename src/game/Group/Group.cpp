@@ -41,6 +41,8 @@
 
 #include <array>
 
+#include "ActionMgr.h"
+
 GroupMemberStatus GetGroupMemberStatus(Player const* member = nullptr)
 {
     uint8 flags = MEMBER_STATUS_OFFLINE;
@@ -2286,7 +2288,10 @@ static void RewardGroupAtKill_helper(Player* pGroupGuy, Unit* pVictim, uint32 co
         {
             uint32 itr_xp = (member_with_max_level == not_gray_member_with_max_level) ? uint32(xp * rate) : uint32((xp * rate / 2) + 1);
             if (pGroupGuy->GetLevel() <= not_gray_member_with_max_level->GetLevel())
+            {
+                sActionMgr.ActionOnPlayerGainExperience(pGroupGuy, xp, XPSource::XP_SOURCE_KILL);
                 pGroupGuy->GiveXP(itr_xp, pVictim);
+            }
             if (Pet* pet = pGroupGuy->GetPet())
                 if (pet->GetLevel() <= not_gray_member_with_max_level->GetLevel())
                     pet->GivePetXP(itr_xp);

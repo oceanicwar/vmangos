@@ -8,7 +8,7 @@ void FlexibleInstancesScript::OnInitializeActionScript()
     sLog.Out(LOG_BASIC, LOG_LVL_BASIC, "Loading Flexible Instance Templates..");
 
     uint32 count = 0;
-    auto result = WorldDatabase.PQuery("SELECT map_id, player_count, hp_multi, dmg_multi FROM flex_instance_template");
+    auto result = WorldDatabase.PQuery("SELECT map_id, player_count, hp_multi, dmg_multi, xp_multi FROM flex_instance_template");
 
     if (result)
     {
@@ -21,6 +21,7 @@ void FlexibleInstancesScript::OnInitializeActionScript()
             flexTemplate.PlayerCount = fields[1].GetUInt32();
             flexTemplate.HealthMultiplier = fields[2].GetFloat();
             flexTemplate.DamageMultiplier = fields[3].GetFloat();
+            flexTemplate.ExpMultiplier = fields[4].GetFloat();
 
             auto it = flexibleInstanceTemplates.find(flexTemplate.MapId);
             if (it == flexibleInstanceTemplates.end())
@@ -254,6 +255,38 @@ uint32 FlexibleInstancesScript::OnSendAttackStateUpdate(CalcDamageInfo const* lo
     }
 
     return std::max(1u, uint32(roundf(log->totalDamage * flexInstance->Template->DamageMultiplier)));
+}
+
+void FlexibleInstancesScript::OnPlayerGainExperience(Player* player, uint32& xp, XPSource source)
+{
+    if (!player || xp == 0)
+    {
+        return;
+    }
+
+    if (source != XPSource::XP_SOURCE_KILL)
+    {
+        return;
+    }
+
+    auto map = player->GetMap();
+    if (!map)
+    {
+        return;
+    }
+
+    if (!IsFlexibleInstance(map))
+    {
+        return;
+    }
+
+    auto flexInstance = GetFlexibleInstance(map);
+    if (!flexInstance || !flexInstance->Template)
+    {
+        return;
+    }
+
+    xp = xp * flexInstance->Template->ExpMultiplier;
 }
 
 const FlexibleInstanceTemplate* FlexibleInstancesScript::GetMultipliersForPlayerCount(uint32 mapId, uint32 playerCount)

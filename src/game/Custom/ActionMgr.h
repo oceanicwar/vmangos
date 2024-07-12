@@ -6,6 +6,12 @@
 #include "Policies/Singleton.h"
 #include "Spell.h"
 
+enum XPSource {
+    XP_SOURCE_EXPLORATION = 0,
+    XP_SOURCE_QUEST = 1,
+    XP_SOURCE_KILL = 2
+};
+
 class ActionScript
 {
 public:
@@ -44,6 +50,9 @@ public:
     // Triggered when a player exits a map.
     virtual void OnPlayerExitMap(Player* player, Map* map) { }
 
+    // Triggered when a player gains experience.
+    virtual void OnPlayerGainExperience(Player* player, uint32& exp, XPSource source) { }
+
     /* ====================================================== */
 
     /* ===================== UNIT HOOKS ===================== */
@@ -77,16 +86,18 @@ enum ActionTypes : uint32
     ACTION_ON_PLAYER_ENTER_MAP = 3,
     ACTION_ON_PLAYER_EXIT_MAP = 4,
 
-    ACTION_ON_UNIT_DAMAGE = 5,
+    ACTION_ON_PLAYER_GAIN_EXP = 5,
 
-    ACTION_ON_CREATURE_UPDATE = 6,
+    ACTION_ON_UNIT_DAMAGE = 6,
 
-    ACTION_ON_SEND_SPELL_DAMAGE_LOG = 7,
-    ACTION_ON_SEND_ATTACK_STATE_UPDATE = 8,
+    ACTION_ON_CREATURE_UPDATE = 7,
 
-    ACTION_ON_ACTIONSCRIPT_INITIALIZE = 9,
+    ACTION_ON_SEND_SPELL_DAMAGE_LOG = 8,
+    ACTION_ON_SEND_ATTACK_STATE_UPDATE = 9,
 
-    ACTION_TYPES_END = 10
+    ACTION_ON_ACTIONSCRIPT_INITIALIZE = 10,
+
+    ACTION_TYPES_END = 11
 };
 
 class ActionMgr
@@ -104,6 +115,8 @@ public:
 
     void ActionOnPlayerEnterMap(Player* player, Map* oldMap, Map* newMap);
     void ActionOnPlayerExitMap(Player* player, Map* map);
+
+    void ActionOnPlayerGainExperience(Player* player, uint32& exp, XPSource source);
 
     void ActionOnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected);
 

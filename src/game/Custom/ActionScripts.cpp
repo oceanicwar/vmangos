@@ -8,6 +8,7 @@ void ActionMgr::Inititalize()
     sActionMgr.RegisterActions(new FlexibleInstancesScript(), {
         ACTION_ON_PLAYER_ENTER_MAP,
         ACTION_ON_PLAYER_EXIT_MAP,
+        ACTION_ON_PLAYER_GAIN_EXP,
         ACTION_ON_CREATURE_UPDATE,
         ACTION_ON_UNIT_DAMAGE,
         ACTION_ON_SEND_SPELL_DAMAGE_LOG,

@@ -12,6 +12,7 @@ struct FlexibleInstanceTemplate {
 
     float HealthMultiplier;
     float DamageMultiplier;
+    float ExpMultiplier;
 };
 
 struct FlexibleInstance {
@@ -28,12 +29,14 @@ public:
 
 public:
     void OnInitializeActionScript() override;
+
     void OnPlayerEnterMap(Player* player, Map* oldMap, Map* newMap) override;
     void OnPlayerExitMap(Player* player, Map* map) override;
     void OnCreatureUpdate(Creature* creature, uint32 update_diff, uint32 diff) override;
     void OnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected) override;
     uint32 OnSendSpellDamageLog(SpellNonMeleeDamage const* log) override;
     uint32 OnSendAttackStateUpdate(CalcDamageInfo const* log) override;
+    void OnPlayerGainExperience(Player* player, uint32& xp, XPSource source) override;
 
     bool IsFlexibleInstance(Map* map);
     void AddPlayerToInstance(uint32 instanceId, Player* player);

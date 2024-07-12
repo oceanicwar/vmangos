@@ -6778,6 +6778,7 @@ void Player::CheckAreaExploreAndOutdoor()
                 else
                     xp = uint32(sObjectMgr.GetBaseXP(p->AreaLevel) * explorationRate);
 
+                sActionMgr.ActionOnPlayerGainExperience(this, xp, XPSource::XP_SOURCE_EXPLORATION);
                 GiveXP(xp, nullptr);
             }
 
@@ -13636,7 +13637,10 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, WorldObject* questE
     uint32 xp = uint32(pQuest->XPValue(this) * (GetPersonalXpRate() >= 0.0f ? GetPersonalXpRate() : sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST)));
 
     if (GetLevel() < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
-        GiveXP(xp , nullptr);
+    {
+        sActionMgr.ActionOnPlayerGainExperience(this, xp, XPSource::XP_SOURCE_QUEST);
+        GiveXP(xp, nullptr);
+    }
     else if (int32 money = pQuest->GetRewMoneyMaxLevelAtComplete())
         LogModifyMoney(money, "QuestMaxLevel", questEnder->GetObjectGuid(), quest_id);
 
@@ -20352,6 +20356,7 @@ void Player::RewardSinglePlayerAtKill(Unit const* pVictim)
     if (!PvP)
     {
         RewardReputation(pVictim, 1);
+        sActionMgr.ActionOnPlayerGainExperience(this, xp, XPSource::XP_SOURCE_KILL);
         GiveXP(xp, pVictim);
 
         // Pet should only gain XP if mob is not grey to Owner.
