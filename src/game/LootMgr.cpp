@@ -29,6 +29,8 @@
 #include "Group.h"
 #include "BattleGroundMgr.h"
 
+#include "ActionMgr.h"
+
 static eConfigFloatValues const qualityToRate[MAX_ITEM_QUALITY] =
 {
     CONFIG_FLOAT_RATE_DROP_ITEM_POOR,                                    // ITEM_QUALITY_POOR
@@ -740,6 +742,8 @@ void Loot::GenerateMoneyLoot(uint32 minAmount, uint32 maxAmount)
             gold = uint32(urand(minAmount, maxAmount) * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY));
         else
             gold = uint32(urand(minAmount >> 8, maxAmount >> 8) * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY)) << 8;
+
+        sActionMgr.ActionOnGenerateLootMoney(this, gold);
     }
 }
 

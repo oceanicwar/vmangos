@@ -245,6 +245,26 @@ uint32 ActionMgr::ActionOnSendAttackStateUpdate(CalcDamageInfo const* log)
     return newDamage;
 }
 
+void ActionMgr::ActionOnGenerateLootMoney(Loot* loot, uint32& money)
+{
+    auto it = actionScripts.find(ACTION_ON_GEN_LOOT_MONEY);
+    if (it == actionScripts.end())
+    {
+        return;
+    }
+
+    auto scripts = it->second;
+    if (scripts.empty())
+    {
+        return;
+    }
+
+    for (auto& script : scripts)
+    {
+        script->OnGenerateLootMoney(loot, money);
+    }
+}
+
 void ActionMgr::ActionOnCreatureUpdate(Creature* creature, uint32 update_diff, uint32 diff)
 {
     auto it = actionScripts.find(ACTION_ON_CREATURE_UPDATE);

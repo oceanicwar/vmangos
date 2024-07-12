@@ -13,6 +13,7 @@ struct FlexibleInstanceTemplate {
     float HealthMultiplier;
     float DamageMultiplier;
     float ExpMultiplier;
+    float GoldMultiplier;
 };
 
 struct FlexibleInstance {
@@ -37,6 +38,7 @@ public:
     uint32 OnSendSpellDamageLog(SpellNonMeleeDamage const* log) override;
     uint32 OnSendAttackStateUpdate(CalcDamageInfo const* log) override;
     void OnPlayerGainExperience(Player* player, uint32& xp, XPSource source) override;
+    void OnGenerateLootMoney(Loot* loot, uint32& money) override;
 
     bool IsFlexibleInstance(Map* map);
     void AddPlayerToInstance(uint32 instanceId, Player* player);

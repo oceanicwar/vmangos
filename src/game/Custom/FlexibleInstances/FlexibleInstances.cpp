@@ -8,7 +8,7 @@ void FlexibleInstancesScript::OnInitializeActionScript()
     sLog.Out(LOG_BASIC, LOG_LVL_BASIC, "Loading Flexible Instance Templates..");
 
     uint32 count = 0;
-    auto result = WorldDatabase.PQuery("SELECT map_id, player_count, hp_multi, dmg_multi, xp_multi FROM flex_instance_template");
+    auto result = WorldDatabase.PQuery("SELECT map_id, player_count, hp_multi, dmg_multi, xp_multi, gold_multi FROM flex_instance_template");
 
     if (result)
     {
@@ -22,6 +22,7 @@ void FlexibleInstancesScript::OnInitializeActionScript()
             flexTemplate.HealthMultiplier = fields[2].GetFloat();
             flexTemplate.DamageMultiplier = fields[3].GetFloat();
             flexTemplate.ExpMultiplier = fields[4].GetFloat();
+            flexTemplate.GoldMultiplier = fields[5].GetFloat();
 
             auto it = flexibleInstanceTemplates.find(flexTemplate.MapId);
             if (it == flexibleInstanceTemplates.end())
@@ -287,6 +288,34 @@ void FlexibleInstancesScript::OnPlayerGainExperience(Player* player, uint32& xp,
     }
 
     xp = xp * flexInstance->Template->ExpMultiplier;
+}
+
+void FlexibleInstancesScript::OnGenerateLootMoney(Loot* loot, uint32& money)
+{
+    if (!loot || money == 0)
+    {
+        return;
+    }
+
+    auto lootTarget = loot->GetLootTarget();
+    if (!lootTarget)
+    {
+        return;
+    }
+
+    auto map = lootTarget->GetMap();
+    if (!IsFlexibleInstance(map))
+    {
+        return;
+    }
+
+    auto flexInstance = GetFlexibleInstance(map);
+    if (!flexInstance || !flexInstance->Template)
+    {
+        return;
+    }
+
+    money = money * flexInstance->Template->GoldMultiplier;
 }
 
 const FlexibleInstanceTemplate* FlexibleInstancesScript::GetMultipliersForPlayerCount(uint32 mapId, uint32 playerCount)

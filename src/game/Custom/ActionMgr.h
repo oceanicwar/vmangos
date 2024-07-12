@@ -68,6 +68,12 @@ public:
 
     /* ====================================================== */
 
+    /* ===================== MISC HOOKS ===================== */
+
+    virtual void OnGenerateLootMoney(Loot* loot, uint32& money) { }
+
+    /* ====================================================== */
+
     const char* GetName()
     {
         return _name;
@@ -95,9 +101,11 @@ enum ActionTypes : uint32
     ACTION_ON_SEND_SPELL_DAMAGE_LOG = 8,
     ACTION_ON_SEND_ATTACK_STATE_UPDATE = 9,
 
-    ACTION_ON_ACTIONSCRIPT_INITIALIZE = 10,
+    ACTION_ON_GEN_LOOT_MONEY = 10,
 
-    ACTION_TYPES_END = 11
+    ACTION_ON_ACTIONSCRIPT_INITIALIZE = 11,
+
+    ACTION_TYPES_END = 12
 };
 
 class ActionMgr
@@ -126,6 +134,8 @@ public:
 
     uint32 ActionOnSendSpellDamageLog(SpellNonMeleeDamage const* log);
     uint32 ActionOnSendAttackStateUpdate(CalcDamageInfo const* log);
+
+    void ActionOnGenerateLootMoney(Loot* loot, uint32& money);
 
 private:
     std::map<uint32, std::vector<ActionScript*>> actionScripts;
