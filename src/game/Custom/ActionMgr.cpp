@@ -247,7 +247,7 @@ uint32 ActionMgr::ActionOnSendAttackStateUpdate(CalcDamageInfo const* log)
 
 void ActionMgr::ActionOnGenerateLootMoney(Loot* loot, uint32& money)
 {
-    auto it = actionScripts.find(ACTION_ON_GEN_LOOT_MONEY);
+    auto it = actionScripts.find(ACTION_ON_LOOT_GENERATE_MONEY);
     if (it == actionScripts.end())
     {
         return;
@@ -262,6 +262,26 @@ void ActionMgr::ActionOnGenerateLootMoney(Loot* loot, uint32& money)
     for (auto& script : scripts)
     {
         script->OnGenerateLootMoney(loot, money);
+    }
+}
+
+void ActionMgr::ActionOnLootProcessed(Loot* loot)
+{
+    auto it = actionScripts.find(ACTION_ON_LOOT_PROCESSED);
+    if (it == actionScripts.end())
+    {
+        return;
+    }
+
+    auto scripts = it->second;
+    if (scripts.empty())
+    {
+        return;
+    }
+
+    for (auto& script : scripts)
+    {
+        script->OnLootProcessed(loot);
     }
 }
 

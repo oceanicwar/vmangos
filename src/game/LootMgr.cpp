@@ -1274,6 +1274,8 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, bool rate, uint8 
     // Now processing groups
     for (const auto& group : Groups)
         group.Process(loot);
+
+    sActionMgr.ActionOnLootProcessed(&loot);
 }
 
 // True if template includes at least 1 quest drop entry

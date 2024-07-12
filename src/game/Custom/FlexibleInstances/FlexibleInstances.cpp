@@ -8,7 +8,7 @@ void FlexibleInstancesScript::OnInitializeActionScript()
     sLog.Out(LOG_BASIC, LOG_LVL_BASIC, "Loading Flexible Instance Templates..");
 
     uint32 count = 0;
-    auto result = WorldDatabase.PQuery("SELECT map_id, player_count, hp_multi, dmg_multi, xp_multi, gold_multi FROM flex_instance_template");
+    auto result = WorldDatabase.PQuery("SELECT map_id, player_count, hp_multi, dmg_multi, xp_multi, gold_multi, item_multi FROM flex_instance_template");
 
     if (result)
     {
@@ -23,6 +23,7 @@ void FlexibleInstancesScript::OnInitializeActionScript()
             flexTemplate.DamageMultiplier = fields[3].GetFloat();
             flexTemplate.ExpMultiplier = fields[4].GetFloat();
             flexTemplate.GoldMultiplier = fields[5].GetFloat();
+            flexTemplate.ItemMultiplier = fields[6].GetFloat();
 
             auto it = flexibleInstanceTemplates.find(flexTemplate.MapId);
             if (it == flexibleInstanceTemplates.end())
@@ -316,6 +317,80 @@ void FlexibleInstancesScript::OnGenerateLootMoney(Loot* loot, uint32& money)
     }
 
     money = money * flexInstance->Template->GoldMultiplier;
+}
+
+void FlexibleInstancesScript::OnLootProcessed(Loot* loot)
+{
+    if (!loot)
+    {
+        return;
+    }
+
+    auto lootTarget = loot->GetLootTarget();
+    if (!lootTarget)
+    {
+        return;
+    }
+
+    auto map = lootTarget->GetMap();
+    if (!IsFlexibleInstance(map))
+    {
+        return;
+    }
+
+    auto flexInstance = GetFlexibleInstance(map);
+    if (!flexInstance || !flexInstance->Template)
+    {
+        return;
+    }
+
+    auto items = loot->items;
+    std::vector<const LootItem*> removableItems;
+
+    for (const auto& item : items)
+    {
+        auto itemProto = sObjectMgr.GetItemPrototype(item.itemid);
+        if (!itemProto)
+        {
+            continue;
+        }
+
+        // These types of items should not be removed from loot table.
+        if (itemProto->Class == ITEM_CLASS_QUEST || 
+            itemProto->Class == ITEM_CLASS_KEY)
+        {
+            continue;
+        }
+
+        removableItems.push_back(&item);
+    }
+
+    sLog.Out(LOG_BASIC, LOG_LVL_BASIC, ">> '%u' loot items generated, shuffling..", removableItems.size());
+
+    // Shuffle the items to randomize removal.
+    std::random_shuffle(removableItems.begin(), removableItems.end());
+
+    auto itemMulti = flexInstance->Template->ItemMultiplier;
+    auto countToRemove = static_cast<uint32>(floor(removableItems.size() - (removableItems.size() * itemMulti)));
+
+    sLog.Out(LOG_BASIC, LOG_LVL_BASIC, ">> Removing '%u' loot items..", countToRemove);
+
+    for (uint32 i = 0; i < countToRemove; ++i)
+    {
+        auto itemToRemove = removableItems[i];
+        if (!itemToRemove)
+        {
+            continue;
+        }
+
+        auto item = std::find_if(loot->items.begin(), loot->items.end(), [itemToRemove](const LootItem& item) {
+            return item.itemid == itemToRemove->itemid;
+        });
+
+        sLog.Out(LOG_BASIC, LOG_LVL_BASIC, ">> Removing item '%u'..", item->itemid);
+
+        loot->items.erase(item);
+    }
 }
 
 const FlexibleInstanceTemplate* FlexibleInstancesScript::GetMultipliersForPlayerCount(uint32 mapId, uint32 playerCount)
