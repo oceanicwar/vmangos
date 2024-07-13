@@ -4,6 +4,7 @@
 #include "ActionMgr.h"
 
 enum FlexibleInstancesConstants {
+    SPELL_ENTRY_FLEXIBLE = 50001
 };
 
 struct FlexibleInstanceTemplate {

@@ -2,6 +2,7 @@
 
 #include "Chat.h"
 #include "InstanceData.h"
+#include "SpellAuras.h"
 
 void FlexibleInstancesScript::OnAfterConfigLoaded(bool reload)
 {
@@ -128,6 +129,25 @@ void FlexibleInstancesScript::OnCreatureUpdate(Creature* creature, uint32 update
     if (!flexInstance || !flexInstance->Template)
     {
         return;
+    }
+
+    // Only add the special aura if the server has it patched in.
+    if (sSpellMgr.GetSpellEntry(SPELL_ENTRY_FLEXIBLE))
+    {
+        auto aura = creature->GetAura(SPELL_ENTRY_FLEXIBLE, SpellEffectIndex::EFFECT_INDEX_0);
+        if (aura)
+        {
+            auto stacks = aura->GetStackAmount();
+            if (stacks != flexInstance->Template->PlayerCount)
+            {
+                aura->GetHolder()->SetStackAmount(flexInstance->Template->PlayerCount);
+            }
+        }
+        else
+        {
+            auto holder = creature->AddAura(SPELL_ENTRY_FLEXIBLE);
+            holder->SetStackAmount(flexInstance->Template->PlayerCount);
+        }
     }
 
     auto creatureInfo = creature->GetCreatureInfo();
