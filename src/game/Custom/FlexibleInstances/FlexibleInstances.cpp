@@ -48,6 +48,22 @@ void FlexibleInstancesScript::OnAfterConfigLoaded(bool reload)
         } while (result->NextRow());
     }
 
+    if (reload)
+    {
+        // Update all the instance templates for the currently running instances.
+        for (auto& entry : flexibleInstances)
+        {
+            FlexibleInstance* instance = &entry.second;
+            if (!instance || !instance->Template)
+            {
+                continue;
+            }
+
+            auto newTemplate = GetMultipliersForPlayerCount(instance->Template->MapId, instance->Players.size());
+            instance->Template = newTemplate;
+        }
+    }
+
     sLog.Out(LOG_BASIC, LOG_LVL_BASIC, ">> Loaded '%u' Flexible Instance Templates.", count);
 }
 
@@ -113,16 +129,13 @@ void FlexibleInstancesScript::OnCreatureUpdate(Creature* creature, uint32 update
         return;
     }
 
-    auto instanceData = map->GetInstanceData();
-    if (!instanceData)
+    if (auto instanceData = map->GetInstanceData())
     {
-        return;
-    }
-
-    // Do not scale during an instance encounter.
-    if (instanceData->IsEncounterInProgress())
-    {
-        return;
+        // Do not scale during an instance encounter.
+        if (instanceData->IsEncounterInProgress())
+        {
+            return;
+        }
     }
 
     auto flexInstance = GetFlexibleInstance(map);
@@ -372,6 +385,13 @@ void FlexibleInstancesScript::OnLootProcessed(Loot* loot)
         return;
     }
 
+    auto itemMulti = flexInstance->Template->ItemMultiplier;
+    if (itemMulti > 1.0f || itemMulti <= 0.0f)
+    {
+        sLog.Out(LOG_BASIC, LOG_LVL_ERROR, ">> Item Multiplifer was set to '%f' but it must be a value between 0-1.", itemMulti);
+        return;
+    }
+
     auto items = loot->items;
     std::vector<const LootItem*> removableItems;
 
@@ -397,8 +417,6 @@ void FlexibleInstancesScript::OnLootProcessed(Loot* loot)
 
     // Shuffle the items to randomize removal.
     std::random_shuffle(removableItems.begin(), removableItems.end());
-
-    auto itemMulti = flexInstance->Template->ItemMultiplier;
     auto countToRemove = static_cast<uint32>(floor(removableItems.size() - (removableItems.size() * itemMulti)));
 
     sLog.Out(LOG_BASIC, LOG_LVL_BASIC, ">> Removing '%u' loot items..", countToRemove);
