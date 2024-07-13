@@ -495,7 +495,7 @@ void FlexibleInstancesScript::NotifyFlexibilityChanged(Map* map, Player* skipPla
             continue;
         }
 
-        ChatHandler(player->GetSession()).PSendSysMessage("|cff00FF00[Flexible Instances]: |cffFFFFFFCreature damage and health has been adjusted for |cffFF0000%u|cffFFFFFF player(s).", flexInstance->Template->PlayerCount);
+        ChatHandler(player->GetSession()).PSendSysMessage("|cffFFD700[Flexible Instances]: |cffFFFFFFCreature damage, health, experience, gold, and item drop rates have been adjusted for a group of |cff00FF00%u|cffFFFFFF.|r", flexInstance->Template->PlayerCount);
     }
 
     flexInstance->NotifiedPlayers = true;
