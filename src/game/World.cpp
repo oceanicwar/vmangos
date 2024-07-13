@@ -1300,8 +1300,15 @@ void World::SetInitialWorldSettings()
     // Time server startup
     uint32 uStartTime = WorldTimer::getMSTime();
 
+    // Initialize the ActionScripts early so they can access early hooks.
+    sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "Initializing Action Scripts...");
+    sActionMgr.Inititalize();
+    sActionMgr.ActionOnInitializeActionScript();
+    sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "");
+
     // Initialize config settings
     LoadConfigSettings();
+    sActionMgr.ActionOnAfterConfigLoaded(false);
 
     // Check the existence of the map files for all races start areas.
     if (!MapManager::ExistMapAndVMap(0, -6240.32f, 331.033f) ||
@@ -1748,11 +1755,6 @@ void World::SetInitialWorldSettings()
 
     sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "Initializing Scripts...");
     sScriptMgr.Initialize();
-    sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "");
-
-    sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "Initializing Action Scripts...");
-    sActionMgr.Inititalize();
-    sActionMgr.ActionOnInitializeActionScript();
     sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "");
 
     sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "Loading aura removal on map change definitions");

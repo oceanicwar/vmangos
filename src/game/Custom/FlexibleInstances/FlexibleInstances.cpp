@@ -3,9 +3,17 @@
 #include "Chat.h"
 #include "InstanceData.h"
 
-void FlexibleInstancesScript::OnInitializeActionScript()
+void FlexibleInstancesScript::OnAfterConfigLoaded(bool reload)
 {
-    sLog.Out(LOG_BASIC, LOG_LVL_BASIC, "Loading Flexible Instance Templates..");
+    if (reload)
+    {
+        sLog.Out(LOG_BASIC, LOG_LVL_BASIC, "Reloading Flexible Instance Templates..");
+        flexibleInstanceTemplates.clear();
+    }
+    else
+    {
+        sLog.Out(LOG_BASIC, LOG_LVL_BASIC, "Loading Flexible Instance Templates..");
+    }
 
     uint32 count = 0;
     auto result = WorldDatabase.PQuery("SELECT map_id, player_count, hp_multi, dmg_multi, xp_multi, gold_multi, item_multi FROM flex_instance_template");

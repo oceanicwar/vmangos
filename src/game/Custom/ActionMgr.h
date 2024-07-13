@@ -80,6 +80,12 @@ public:
 
     /* ====================================================== */
 
+    /* ===================== MISC HOOKS ===================== */
+
+    virtual void OnAfterConfigLoaded(bool reload) { }
+
+    /* ====================================================== */
+
     const char* GetName()
     {
         return _name;
@@ -112,7 +118,9 @@ enum ActionTypes : uint32
 
     ACTION_ON_ACTIONSCRIPT_INITIALIZE = 12,
 
-    ACTION_TYPES_END = 13
+    ACTION_ON_AFTER_CONFIG_LOADED = 13,
+
+    ACTION_TYPES_END = 14
 };
 
 class ActionMgr
@@ -144,6 +152,8 @@ public:
 
     void ActionOnGenerateLootMoney(Loot* loot, uint32& money);
     void ActionOnLootProcessed(Loot* loot);
+
+    void ActionOnAfterConfigLoaded(bool reload);
 
 private:
     std::map<uint32, std::vector<ActionScript*>> actionScripts;

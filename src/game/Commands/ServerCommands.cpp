@@ -42,6 +42,8 @@
 #include "CreatureGroups.h"
 #include "HardcodedEvents.h"
 
+#include "ActionMgr.h"
+
 bool ChatHandler::HandleAnnounceCommand(char* args)
 {
     if (!*args)
@@ -1016,6 +1018,7 @@ bool ChatHandler::HandleReloadConfigCommand(char* /*args*/)
 {
     sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "Re-Loading config settings...");
     sWorld.LoadConfigSettings(true);
+    sActionMgr.ActionOnAfterConfigLoaded(true);
     SendSysMessage("World config settings reloaded.");
     return true;
 }

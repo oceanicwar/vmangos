@@ -285,6 +285,26 @@ void ActionMgr::ActionOnLootProcessed(Loot* loot)
     }
 }
 
+void ActionMgr::ActionOnAfterConfigLoaded(bool reload)
+{
+    auto it = actionScripts.find(ACTION_ON_AFTER_CONFIG_LOADED);
+    if (it == actionScripts.end())
+    {
+        return;
+    }
+
+    auto scripts = it->second;
+    if (scripts.empty())
+    {
+        return;
+    }
+
+    for (auto& script : scripts)
+    {
+        script->OnAfterConfigLoaded(reload);
+    }
+}
+
 void ActionMgr::ActionOnCreatureUpdate(Creature* creature, uint32 update_diff, uint32 diff)
 {
     auto it = actionScripts.find(ACTION_ON_CREATURE_UPDATE);

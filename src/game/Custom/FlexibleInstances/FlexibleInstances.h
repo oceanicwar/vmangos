@@ -30,7 +30,7 @@ public:
     FlexibleInstancesScript() : ActionScript("FlexibleInstancesScript") { }
 
 public:
-    void OnInitializeActionScript() override;
+    void OnAfterConfigLoaded(bool reload) override;
 
     void OnPlayerEnterMap(Player* player, Map* oldMap, Map* newMap) override;
     void OnPlayerExitMap(Player* player, Map* map) override;
