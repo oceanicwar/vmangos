@@ -191,6 +191,26 @@ void ActionMgr::ActionOnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage
     }
 }
 
+void ActionMgr::ActionOnUnitDamagePeriodic(Unit* aggressor, Unit* victim, uint32& damage, Aura* aura)
+{
+    auto it = actionScripts.find(ACTION_ON_UNIT_DAMAGE_PERIODIC);
+    if (it == actionScripts.end())
+    {
+        return;
+    }
+
+    auto scripts = it->second;
+    if (scripts.empty())
+    {
+        return;
+    }
+
+    for (auto& script : scripts)
+    {
+        script->OnUnitDamagePeriodic(aggressor, victim, damage, aura);
+    }
+}
+
 uint32 ActionMgr::ActionOnSendSpellDamageLog(SpellNonMeleeDamage const* log)
 {
     auto it = actionScripts.find(ACTION_ON_SEND_SPELL_DAMAGE_LOG);

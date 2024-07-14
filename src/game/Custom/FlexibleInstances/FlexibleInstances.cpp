@@ -243,6 +243,45 @@ void FlexibleInstancesScript::OnUnitDamage(Unit* aggressor, Unit* victim, uint32
     damage = newDamage;
 }
 
+void FlexibleInstancesScript::OnUnitDamagePeriodic(Unit* aggressor, Unit* victim, uint32& damage, Aura* aura)
+{
+    if (!aggressor || !victim)
+    {
+        return;
+    }
+
+    if (aggressor->IsPlayer() || !aggressor->IsCreature())
+    {
+        return;
+    }
+
+    auto creature = aggressor->ToCreature();
+    if (!creature)
+    {
+        return;
+    }
+
+    auto map = creature->GetMap();
+    if (!map)
+    {
+        return;
+    }
+
+    if (!IsFlexibleInstance(map))
+    {
+        return;
+    }
+
+    auto metadata = creature->GetMetadata<FlexibleInstanceTemplate>(MetadataFlexibleInstances);
+    if (!metadata)
+    {
+        return;
+    }
+
+    uint32 newDamage = std::max(1u, uint32(roundf(damage * metadata->DamageMultiplier)));
+    damage = newDamage;
+}
+
 uint32 FlexibleInstancesScript::OnSendSpellDamageLog(SpellNonMeleeDamage const* log)
 {
     auto aggressor = log->attacker;

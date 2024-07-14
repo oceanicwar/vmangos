@@ -31,6 +31,7 @@ public:
     void OnPlayerExitMap(Player* player, Map* map) override;
     void OnCreatureUpdate(Creature* creature, uint32 update_diff, uint32 diff) override;
     void OnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected) override;
+    void OnUnitDamagePeriodic(Unit* aggressor, Unit* victim, uint32& damage, Aura* aura) override;
     uint32 OnSendSpellDamageLog(SpellNonMeleeDamage const* log) override;
     uint32 OnSendAttackStateUpdate(CalcDamageInfo const* log) override;
     void OnPlayerGainExperience(Player* player, uint32& xp, XPSource source) override;

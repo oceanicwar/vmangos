@@ -50,6 +50,8 @@
 #include "ZoneScript.h"
 #include "LoveIsInTheAir.h"
 
+#include "ActionMgr.h"
+
 using namespace Spells;
 
 #define NULL_AURA_SLOT 0xFF
@@ -6127,7 +6129,10 @@ void Aura::PeriodicTick(SpellEntry const* sProto, AuraType auraType, uint32 data
             }
 
             uint32 pdamage = ditheru(std::max(fdamage, 0.f)); // prevent negative damage due to sickness
-            uint32 const originalDamage = pdamage;
+
+            sActionMgr.ActionOnUnitDamagePeriodic(pCaster, target, pdamage, this);
+
+            uint32 originalDamage = pdamage;
 
             target->CalculateDamageAbsorbAndResist(pCaster, spellProto->GetSpellSchoolMask(), DOT, pdamage, &absorb, &resist, spellProto);
 

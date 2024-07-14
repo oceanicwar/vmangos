@@ -61,6 +61,9 @@ public:
     // Triggered after the calculations for damage have passed when a unit deals damage to another unit.
     virtual void OnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected) { }
 
+    // Triggered after the calculations for damage have passed when a unit deals periodic damage to another unit.
+    virtual void OnUnitDamagePeriodic(Unit* aggressor, Unit* victim, uint32& damage, Aura* aura) { }
+
     /* ====================================================== */
 
     /* =================== CREATURE HOOKS =================== */
@@ -107,20 +110,21 @@ enum ActionTypes : uint32
     ACTION_ON_PLAYER_GAIN_EXP = 5,
 
     ACTION_ON_UNIT_DAMAGE = 6,
+    ACTION_ON_UNIT_DAMAGE_PERIODIC = 7,
 
-    ACTION_ON_CREATURE_UPDATE = 7,
+    ACTION_ON_CREATURE_UPDATE = 8,
 
-    ACTION_ON_SEND_SPELL_DAMAGE_LOG = 8,
-    ACTION_ON_SEND_ATTACK_STATE_UPDATE = 9,
+    ACTION_ON_SEND_SPELL_DAMAGE_LOG = 9,
+    ACTION_ON_SEND_ATTACK_STATE_UPDATE = 10,
 
-    ACTION_ON_LOOT_GENERATE_MONEY = 10,
-    ACTION_ON_LOOT_PROCESSED = 11,
+    ACTION_ON_LOOT_GENERATE_MONEY = 11,
+    ACTION_ON_LOOT_PROCESSED = 12,
 
-    ACTION_ON_ACTIONSCRIPT_INITIALIZE = 12,
+    ACTION_ON_ACTIONSCRIPT_INITIALIZE = 13,
 
-    ACTION_ON_AFTER_CONFIG_LOADED = 13,
+    ACTION_ON_AFTER_CONFIG_LOADED = 14,
 
-    ACTION_TYPES_END = 14
+    ACTION_TYPES_END = 15
 };
 
 class ActionMgr
@@ -142,6 +146,7 @@ public:
     void ActionOnPlayerGainExperience(Player* player, uint32& exp, XPSource source);
 
     void ActionOnUnitDamage(Unit* aggressor, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, Spell* spell, bool reflected);
+    void ActionOnUnitDamagePeriodic(Unit* aggressor, Unit* victim, uint32& damage, Aura* aura);
 
     void ActionOnCreatureUpdate(Creature* creature, uint32 update_diff, uint32 diff);
 
