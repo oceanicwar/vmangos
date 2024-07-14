@@ -36,6 +36,9 @@
 #include "Timer.h"
 #include "Camera.h"
 #include "Cell.h"
+
+#include "Custom/MetadataObject.h"
+
 #include <string>
 
 class WorldPacket;
@@ -94,7 +97,7 @@ enum ObjectDelayedAction
 
 typedef void(*CreatureAiSetter) (Creature* pCreature);
 
-class Object
+class Object : public MetadataObject
 {
     public:
         virtual ~Object();

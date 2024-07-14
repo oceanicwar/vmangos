@@ -3,6 +3,8 @@
 
 #include "ActionMgr.h"
 
+#define MetadataFlexibleInstances "FlexibleInstances"
+
 enum FlexibleInstancesConstants {
     SPELL_ENTRY_FLEXIBLE = 50001
 };
@@ -15,14 +17,6 @@ struct FlexibleInstanceTemplate {
     float ExpMultiplier;
     float GoldMultiplier;
     float ItemMultiplier;
-};
-
-struct FlexibleInstance {
-    uint32 MapId;
-    FlexibleInstanceTemplate const* Template;
-
-    std::unordered_set<uint64> Players;
-    bool NotifiedPlayers;
 };
 
 class FlexibleInstancesScript : public ActionScript
@@ -44,18 +38,16 @@ public:
     void OnLootProcessed(Loot* loot) override;
 
     bool IsFlexibleInstance(Map* map);
-    void AddPlayerToInstance(Map* map, Player* player);
-    void RemovePlayerFromInstance(Map* map, Player* player);
-    uint32 GetPlayerCountForInstance(uint32 instanceId);
-    const FlexibleInstanceTemplate* GetMultipliersForPlayerCount(uint32 mapId, uint32 playerCount);
+    uint32 GetPlayerCountForMap(Map* map);
+    const FlexibleInstanceTemplate* GetTemplateForPlayerCount(uint32 mapId, uint32 playerCount);
+    bool CheckTemplatesMatch(const FlexibleInstanceTemplate* template1, const FlexibleInstanceTemplate* template2);
 
-    void UpdateFlexibility(Map* map);
+    void UpdateFlexTemplateForMap(Map* map);
+    void UpdateFlexTemplateForCreature(Creature* creature);
     void NotifyFlexibilityChanged(Map* map, Player* skipPlayer = nullptr);
-    FlexibleInstance* GetFlexibleInstance(Map* map);
 
 private:
     std::unordered_map<uint32 /* MapId */, std::unordered_map<uint32 /* PlayerCount */, FlexibleInstanceTemplate>> flexibleInstanceTemplates;
-    std::unordered_map<uint32 /* InstanceId */, FlexibleInstance> flexibleInstances;
 };
 
 #endif

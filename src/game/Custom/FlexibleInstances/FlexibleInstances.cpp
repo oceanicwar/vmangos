@@ -1,4 +1,5 @@
 #include "FlexibleInstances.h"
+#include "Custom/MetadataObject.h"
 
 #include "Chat.h"
 #include "InstanceData.h"
@@ -48,19 +49,25 @@ void FlexibleInstancesScript::OnAfterConfigLoaded(bool reload)
         } while (result->NextRow());
     }
 
+    // Update the flex templates for currently loaded maps.
     if (reload)
     {
-        // Update all the instance templates for the currently running instances.
-        for (auto& entry : flexibleInstances)
+        auto maps = sMapMgr.Maps();
+        for (auto& mapRef : maps)
         {
-            FlexibleInstance* instance = &entry.second;
-            if (!instance || !instance->Template)
+            auto map = mapRef.second;
+            if (!map)
+            {
+                return;
+            }
+
+            if (!IsFlexibleInstance(map))
             {
                 continue;
             }
 
-            auto newTemplate = GetMultipliersForPlayerCount(instance->MapId, instance->Players.size());
-            instance->Template = newTemplate;
+            UpdateFlexTemplateForMap(map);
+            NotifyFlexibilityChanged(map);
         }
     }
 
@@ -78,9 +85,8 @@ void FlexibleInstancesScript::OnPlayerEnterMap(Player* player, Map* oldMap, Map*
     {
         return;
     }
-    
-    AddPlayerToInstance(newMap, player);
-    UpdateFlexibility(newMap);
+
+    UpdateFlexTemplateForMap(newMap);
     NotifyFlexibilityChanged(newMap);
 
     sLog.Out(LOG_BASIC, LOG_LVL_BASIC, "Player '%s' entered instance map '%u'.", player->GetName(), newMap->GetId());
@@ -98,8 +104,7 @@ void FlexibleInstancesScript::OnPlayerExitMap(Player* player, Map* map)
         return;
     }
 
-    RemovePlayerFromInstance(map, player);
-    UpdateFlexibility(map);
+    UpdateFlexTemplateForMap(map);
     NotifyFlexibilityChanged(map, player);
 
     sLog.Out(LOG_BASIC, LOG_LVL_BASIC, "Player '%s' left instance map '%u'.", player->GetName(), map->GetId());
@@ -123,11 +128,11 @@ void FlexibleInstancesScript::OnCreatureUpdate(Creature* creature, uint32 update
         return;
     }
 
-    // Do not scale creatures in combat. (DISABLED)
-    /*if (creature->IsInCombat())
+    // Do not scale creatures in combat.
+    if (creature->IsInCombat())
     {
         return;
-    }*/
+    }
 
     if (auto instanceData = map->GetInstanceData())
     {
@@ -138,28 +143,48 @@ void FlexibleInstancesScript::OnCreatureUpdate(Creature* creature, uint32 update
         }
     }
 
-    auto flexInstance = GetFlexibleInstance(map);
-    if (!flexInstance || !flexInstance->Template)
+    auto mapTemplate = map->GetMetadata<FlexibleInstanceTemplate>(MetadataFlexibleInstances);
+
+    // The map does not have a flex template.
+    if (!mapTemplate)
     {
+        return;
+    }
+
+    auto creatureTemplate = creature->GetMetadata<FlexibleInstanceTemplate>(MetadataFlexibleInstances);
+
+    // The creatures template matches the map template and does not need to be updated.
+    if (creatureTemplate && CheckTemplatesMatch(mapTemplate, creatureTemplate))
+    {
+        return;
+    }
+
+    UpdateFlexTemplateForCreature(creature);
+
+    creatureTemplate = creature->GetMetadata<FlexibleInstanceTemplate>(MetadataFlexibleInstances);
+    if (!creatureTemplate)
+    {
+        sLog.Out(LOG_BASIC, LOG_LVL_ERROR, "Creature '%u' flex template failed to update.", creature->GetGUID());
         return;
     }
 
     // Only add the special aura if the server has it patched in.
     if (sSpellMgr.GetSpellEntry(SPELL_ENTRY_FLEXIBLE))
     {
+        // Update the aura stacks to match the template.
         auto aura = creature->GetAura(SPELL_ENTRY_FLEXIBLE, SpellEffectIndex::EFFECT_INDEX_0);
         if (aura)
         {
             auto stacks = aura->GetStackAmount();
-            if (stacks != flexInstance->Template->PlayerCount)
+            if (stacks != creatureTemplate->PlayerCount)
             {
-                aura->GetHolder()->SetStackAmount(flexInstance->Template->PlayerCount);
+                aura->GetHolder()->SetStackAmount(creatureTemplate->PlayerCount);
             }
         }
         else
         {
             auto holder = creature->AddAura(SPELL_ENTRY_FLEXIBLE);
-            holder->SetStackAmount(flexInstance->Template->PlayerCount);
+            holder->SetStackAmount(creatureTemplate->PlayerCount);
         }
     }
 
@@ -169,7 +194,7 @@ void FlexibleInstancesScript::OnCreatureUpdate(Creature* creature, uint32 update
     auto creatureCLS = creature->GetClassLevelStats();
 
     float const healthMod = creature->_GetHealthMod(rank);
-    uint32 const health = std::max(1u, uint32(roundf(healthMod * creatureCLS->health * creatureInfo->health_multiplier * flexInstance->Template->HealthMultiplier)));
+    uint32 const health = std::max(1u, uint32(roundf(healthMod * creatureCLS->health * creatureInfo->health_multiplier * creatureTemplate->HealthMultiplier)));
 
     if (creature->GetMaxHealth() == health)
     {
@@ -208,13 +233,13 @@ void FlexibleInstancesScript::OnUnitDamage(Unit* aggressor, Unit* victim, uint32
         return;
     }
 
-    auto flexInstance = GetFlexibleInstance(map);
-    if (!flexInstance || !flexInstance->Template)
+    auto metadata = creature->GetMetadata<FlexibleInstanceTemplate>(MetadataFlexibleInstances);
+    if (!metadata)
     {
         return;
     }
 
-    uint32 newDamage = std::max(1u, uint32(roundf(damage * flexInstance->Template->DamageMultiplier)));
+    uint32 newDamage = std::max(1u, uint32(roundf(damage * metadata->DamageMultiplier)));
     damage = newDamage;
 }
 
@@ -250,13 +275,13 @@ uint32 FlexibleInstancesScript::OnSendSpellDamageLog(SpellNonMeleeDamage const* 
         return 0;
     }
 
-    auto flexInstance = GetFlexibleInstance(map);
-    if (!flexInstance || !flexInstance->Template)
+    auto metadata = creature->GetMetadata<FlexibleInstanceTemplate>(MetadataFlexibleInstances);
+    if (!metadata)
     {
         return 0;
     }
 
-    return std::max(1u, uint32(roundf(log->damage * flexInstance->Template->DamageMultiplier)));
+    return std::max(1u, uint32(roundf(log->damage * metadata->DamageMultiplier)));
 }
 
 uint32 FlexibleInstancesScript::OnSendAttackStateUpdate(CalcDamageInfo const* log)
@@ -291,13 +316,13 @@ uint32 FlexibleInstancesScript::OnSendAttackStateUpdate(CalcDamageInfo const* lo
         return 0;
     }
 
-    auto flexInstance = GetFlexibleInstance(map);
-    if (!flexInstance || !flexInstance->Template)
+    auto metadata = creature->GetMetadata<FlexibleInstanceTemplate>(MetadataFlexibleInstances);
+    if (!metadata)
     {
         return 0;
     }
 
-    return std::max(1u, uint32(roundf(log->totalDamage * flexInstance->Template->DamageMultiplier)));
+    return std::max(1u, uint32(roundf(log->totalDamage * metadata->DamageMultiplier)));
 }
 
 void FlexibleInstancesScript::OnPlayerGainExperience(Player* player, uint32& xp, XPSource source)
@@ -323,13 +348,15 @@ void FlexibleInstancesScript::OnPlayerGainExperience(Player* player, uint32& xp,
         return;
     }
 
-    auto flexInstance = GetFlexibleInstance(map);
-    if (!flexInstance || !flexInstance->Template)
+    auto mapTemplate = map->GetMetadata<FlexibleInstanceTemplate>(MetadataFlexibleInstances);
+
+    // The map does not have a flex template.
+    if (!mapTemplate)
     {
         return;
     }
 
-    xp = xp * flexInstance->Template->ExpMultiplier;
+    xp = xp * mapTemplate->ExpMultiplier;
 }
 
 void FlexibleInstancesScript::OnGenerateLootMoney(Loot* loot, uint32& money)
@@ -351,13 +378,15 @@ void FlexibleInstancesScript::OnGenerateLootMoney(Loot* loot, uint32& money)
         return;
     }
 
-    auto flexInstance = GetFlexibleInstance(map);
-    if (!flexInstance || !flexInstance->Template)
+    auto mapTemplate = map->GetMetadata<FlexibleInstanceTemplate>(MetadataFlexibleInstances);
+
+    // The map does not have a flex template.
+    if (!mapTemplate)
     {
         return;
     }
 
-    money = money * flexInstance->Template->GoldMultiplier;
+    money = money * mapTemplate->GoldMultiplier;
 }
 
 void FlexibleInstancesScript::OnLootProcessed(Loot* loot)
@@ -379,13 +408,15 @@ void FlexibleInstancesScript::OnLootProcessed(Loot* loot)
         return;
     }
 
-    auto flexInstance = GetFlexibleInstance(map);
-    if (!flexInstance || !flexInstance->Template)
+    auto mapTemplate = map->GetMetadata<FlexibleInstanceTemplate>(MetadataFlexibleInstances);
+
+    // The map does not have a flex template.
+    if (!mapTemplate)
     {
         return;
     }
 
-    auto itemMulti = flexInstance->Template->ItemMultiplier;
+    auto itemMulti = mapTemplate->ItemMultiplier;
     if (itemMulti > 1.0f || itemMulti <= 0.0f)
     {
         sLog.Out(LOG_BASIC, LOG_LVL_ERROR, ">> Item Multiplifer was set to '%f' but it must be a value between 0-1.", itemMulti);
@@ -439,7 +470,7 @@ void FlexibleInstancesScript::OnLootProcessed(Loot* loot)
     }
 }
 
-const FlexibleInstanceTemplate* FlexibleInstancesScript::GetMultipliersForPlayerCount(uint32 mapId, uint32 playerCount)
+const FlexibleInstanceTemplate* FlexibleInstancesScript::GetTemplateForPlayerCount(uint32 mapId, uint32 playerCount)
 {
     // Find templates for map.
     auto it = flexibleInstanceTemplates.find(mapId);
@@ -471,57 +502,66 @@ const FlexibleInstanceTemplate* FlexibleInstancesScript::GetMultipliersForPlayer
     return selectedTemplate;
 }
 
-void FlexibleInstancesScript::UpdateFlexibility(Map* map)
+bool FlexibleInstancesScript::CheckTemplatesMatch(const FlexibleInstanceTemplate* template1, const FlexibleInstanceTemplate* template2)
 {
-    uint32 mapId = map->GetId();
-    uint32 instanceId = map->GetInstanceId();
-    uint32 playerCount = GetPlayerCountForInstance(instanceId);
+    if (!template1 && !template2)
+    {
+        return true;
+    }
 
-    // There are no players in the instance.
-    if (!playerCount)
+    if ((template1 && !template2) ||
+        (!template1 && template2))
+    {
+        return false;
+    }
+
+    float epsilon = 1e-5f;
+
+    return template1->PlayerCount == template2->PlayerCount &&
+        std::fabs(template1->HealthMultiplier - template2->HealthMultiplier) < epsilon &&
+        std::fabs(template1->DamageMultiplier - template2->DamageMultiplier) < epsilon &&
+        std::fabs(template1->ExpMultiplier - template2->ExpMultiplier) < epsilon &&
+        std::fabs(template1->GoldMultiplier - template2->GoldMultiplier) < epsilon &&
+        std::fabs(template1->ItemMultiplier - template2->ItemMultiplier) < epsilon;
+}
+
+void FlexibleInstancesScript::UpdateFlexTemplateForMap(Map* map)
+{
+    // Get a fitting template for the map
+    uint32 playerCount = GetPlayerCountForMap(map);
+    auto flexTemplate = GetTemplateForPlayerCount(map->GetId(), playerCount);
+
+    // Copy the template to the maps metadata (replacing old template).
+    map->SetMetadata<FlexibleInstanceTemplate>(MetadataFlexibleInstances, *flexTemplate);
+}
+
+void FlexibleInstancesScript::UpdateFlexTemplateForCreature(Creature* creature)
+{
+    if (!creature)
     {
         return;
     }
 
-    auto flexTemplate = GetMultipliersForPlayerCount(mapId, playerCount);
-    if (!flexTemplate)
+    auto map = creature->GetMap();
+    if (!map)
     {
         return;
     }
 
-    auto it = flexibleInstances.find(instanceId);
-    if (it == flexibleInstances.end())
+    auto mapTemplate = map->GetMetadata<FlexibleInstanceTemplate>(MetadataFlexibleInstances);
+    if (!mapTemplate)
     {
         return;
     }
 
-    auto instanceTemplate = it->second.Template;
-    if (!instanceTemplate)
-    {
-        it->second.Template = flexTemplate;
-        it->second.NotifiedPlayers = false;
-        return;
-    }
-
-    // Template already in effect.
-    if (instanceTemplate->PlayerCount == flexTemplate->PlayerCount)
-    {
-        return;
-    }
-
-    it->second.Template = flexTemplate;
-    it->second.NotifiedPlayers = false;
+    // Copy the map template to the creature.
+    creature->SetMetadata<FlexibleInstanceTemplate>(MetadataFlexibleInstances, *mapTemplate);
 }
 
 void FlexibleInstancesScript::NotifyFlexibilityChanged(Map* map, Player* skipPlayer)
 {
-    auto flexInstance = GetFlexibleInstance(map);
-    if (!flexInstance)
-    {
-        return;
-    }
-
-    if (!flexInstance->Template)
+    auto metadata = map->GetMetadata<FlexibleInstanceTemplate>(MetadataFlexibleInstances);
+    if (!metadata)
     {
         return;
     }
@@ -541,23 +581,8 @@ void FlexibleInstancesScript::NotifyFlexibilityChanged(Map* map, Player* skipPla
             continue;
         }
 
-        ChatHandler(player->GetSession()).PSendSysMessage("|cffFFD700[Flexible Instances]: |cffFFFFFFCreature damage, health, experience, gold, and item drop rates have been adjusted for a group of |cff00FF00%u|cffFFFFFF.|r", flexInstance->Template->PlayerCount);
+        ChatHandler(player->GetSession()).PSendSysMessage("|cffFFD700[Flexible Instances]: |cffFFFFFFCreature damage, health, experience, gold, and item drop rates have been adjusted for a group of |cff00FF00%u|cffFFFFFF.|r", metadata->PlayerCount);
     }
-
-    flexInstance->NotifiedPlayers = true;
-}
-
-FlexibleInstance* FlexibleInstancesScript::GetFlexibleInstance(Map* map)
-{
-    uint32 instanceId = map->GetInstanceId();
-
-    auto it = flexibleInstances.find(instanceId);
-    if (it == flexibleInstances.end())
-    {
-        return nullptr;
-    }
-
-    return &it->second;
 }
 
 bool FlexibleInstancesScript::IsFlexibleInstance(Map* map)
@@ -575,64 +600,25 @@ bool FlexibleInstancesScript::IsFlexibleInstance(Map* map)
     return true;
 }
 
-void FlexibleInstancesScript::AddPlayerToInstance(Map* map, Player* player)
+uint32 FlexibleInstancesScript::GetPlayerCountForMap(Map* map)
 {
-    uint32 instanceId = map->GetInstanceId();
-
-    auto it = flexibleInstances.find(instanceId);
-    if (it == flexibleInstances.end())
+    if (!map)
     {
-        FlexibleInstance flexInstance;
-        flexInstance.MapId = map->GetId();
-
-        flexibleInstances.emplace(instanceId, flexInstance);
-    }
-
-    it = flexibleInstances.find(instanceId);
-    if (it == flexibleInstances.end())
-    {
-        return;
-    }
-
-    auto it2 = it->second.Players.find(player->GetGUID());
-    if (it2 != it->second.Players.end())
-    {
-        // Player already exists in instance.
-        return;
-    }
-
-    it->second.Players.emplace(player->GetGUID());
-}
-
-void FlexibleInstancesScript::RemovePlayerFromInstance(Map* map, Player* player)
-{
-    uint32 instanceId = map->GetInstanceId();
-
-    auto it = flexibleInstances.find(instanceId);
-    if (it == flexibleInstances.end())
-    {
-        // Instance does not exist, no need to remove.
-        return;
-    }
-
-    auto it2 = it->second.Players.find(player->GetGUID());
-    if (it2 == it->second.Players.end())
-    {
-        // Player is not inside the instance.
-        return;
-    }
-
-    it->second.Players.erase(it2);
-}
-
-uint32 FlexibleInstancesScript::GetPlayerCountForInstance(uint32 instanceId)
-{
-    auto it = flexibleInstances.find(instanceId);
-    if (it == flexibleInstances.end())
-    {
-        // Instance does not exist.
         return 0;
     }
 
-    return it->second.Players.size();
+    uint32 count = 0;
+    Map::PlayerList const& players = map->GetPlayers();
+    for (const auto& playerRef : players)
+    {
+        auto player = playerRef.getSource();
+        if (!player)
+        {
+            continue;
+        }
+
+        count++;
+    }
+
+    return count;
 }

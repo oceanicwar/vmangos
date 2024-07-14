@@ -39,6 +39,8 @@
 #include "ScriptCommands.h"
 #include "CreatureLinkingMgr.h"
 
+#include "Custom/MetadataObject.h"
+
 #include <bitset>
 #include <list>
 #include <set>
@@ -316,7 +318,7 @@ struct ScriptedEvent
 
 class ThreadPool;
 
-class Map : public GridRefManager<NGridType>
+class Map : public GridRefManager<NGridType>, public MetadataObject
 {
     friend class MapReference;
     friend class ObjectGridLoader;
