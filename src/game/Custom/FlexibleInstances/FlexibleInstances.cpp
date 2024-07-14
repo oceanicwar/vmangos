@@ -123,11 +123,11 @@ void FlexibleInstancesScript::OnCreatureUpdate(Creature* creature, uint32 update
         return;
     }
 
-    // Do not scale creatures in combat.
-    if (creature->IsInCombat())
+    // Do not scale creatures in combat. (DISABLED)
+    /*if (creature->IsInCombat())
     {
         return;
-    }
+    }*/
 
     if (auto instanceData = map->GetInstanceData())
     {
