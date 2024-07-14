@@ -128,21 +128,6 @@ void FlexibleInstancesScript::OnCreatureUpdate(Creature* creature, uint32 update
         return;
     }
 
-    // Do not scale creatures in combat.
-    if (creature->IsInCombat())
-    {
-        return;
-    }
-
-    if (auto instanceData = map->GetInstanceData())
-    {
-        // Do not scale during an instance encounter.
-        if (instanceData->IsEncounterInProgress())
-        {
-            return;
-        }
-    }
-
     auto mapTemplate = map->GetMetadata<FlexibleInstanceTemplate>(MetadataFlexibleInstances);
 
     // The map does not have a flex template.
@@ -157,6 +142,25 @@ void FlexibleInstancesScript::OnCreatureUpdate(Creature* creature, uint32 update
     if (creatureTemplate && CheckTemplatesMatch(mapTemplate, creatureTemplate))
     {
         return;
+    }
+
+    // Only check creatures with a template (allow summons to get a template)
+    if (creatureTemplate)
+    {
+        // Do not scale creatures in combat.
+        if (creature->IsInCombat())
+        {
+            return;
+        }
+
+        if (auto instanceData = map->GetInstanceData())
+        {
+            // Do not scale during an instance encounter.
+            if (instanceData->IsEncounterInProgress())
+            {
+                return;
+            }
+        }
     }
 
     UpdateFlexTemplateForCreature(creature);
