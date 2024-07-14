@@ -26,7 +26,7 @@ void FlexibleInstancesScript::OnAfterConfigLoaded(bool reload)
             auto fields = result->Fetch();
 
             FlexibleInstanceTemplate flexTemplate;
-            flexTemplate.MapId = fields[0].GetUInt32();
+            uint32 mapId = fields[0].GetUInt32();
             flexTemplate.PlayerCount = fields[1].GetUInt32();
             flexTemplate.HealthMultiplier = fields[2].GetFloat();
             flexTemplate.DamageMultiplier = fields[3].GetFloat();
@@ -34,14 +34,14 @@ void FlexibleInstancesScript::OnAfterConfigLoaded(bool reload)
             flexTemplate.GoldMultiplier = fields[5].GetFloat();
             flexTemplate.ItemMultiplier = fields[6].GetFloat();
 
-            auto it = flexibleInstanceTemplates.find(flexTemplate.MapId);
+            auto it = flexibleInstanceTemplates.find(mapId);
             if (it == flexibleInstanceTemplates.end())
             {
                 std::unordered_map<uint32, FlexibleInstanceTemplate> instanceMap;
-                flexibleInstanceTemplates.emplace(flexTemplate.MapId, instanceMap);
+                flexibleInstanceTemplates.emplace(mapId, instanceMap);
             }
 
-            it = flexibleInstanceTemplates.find(flexTemplate.MapId);
+            it = flexibleInstanceTemplates.find(mapId);
             it->second.emplace(flexTemplate.PlayerCount, flexTemplate);
 
             count++;
@@ -59,7 +59,7 @@ void FlexibleInstancesScript::OnAfterConfigLoaded(bool reload)
                 continue;
             }
 
-            auto newTemplate = GetMultipliersForPlayerCount(instance->Template->MapId, instance->Players.size());
+            auto newTemplate = GetMultipliersForPlayerCount(instance->MapId, instance->Players.size());
             instance->Template = newTemplate;
         }
     }
@@ -79,7 +79,7 @@ void FlexibleInstancesScript::OnPlayerEnterMap(Player* player, Map* oldMap, Map*
         return;
     }
     
-    AddPlayerToInstance(newMap->GetInstanceId(), player);
+    AddPlayerToInstance(newMap, player);
     UpdateFlexibility(newMap);
     NotifyFlexibilityChanged(newMap);
 
@@ -98,7 +98,7 @@ void FlexibleInstancesScript::OnPlayerExitMap(Player* player, Map* map)
         return;
     }
 
-    RemovePlayerFromInstance(map->GetInstanceId(), player);
+    RemovePlayerFromInstance(map, player);
     UpdateFlexibility(map);
     NotifyFlexibilityChanged(map, player);
 
@@ -575,12 +575,16 @@ bool FlexibleInstancesScript::IsFlexibleInstance(Map* map)
     return true;
 }
 
-void FlexibleInstancesScript::AddPlayerToInstance(uint32 instanceId, Player* player)
+void FlexibleInstancesScript::AddPlayerToInstance(Map* map, Player* player)
 {
+    uint32 instanceId = map->GetInstanceId();
+
     auto it = flexibleInstances.find(instanceId);
     if (it == flexibleInstances.end())
     {
         FlexibleInstance flexInstance;
+        flexInstance.MapId = map->GetId();
+
         flexibleInstances.emplace(instanceId, flexInstance);
     }
 
@@ -600,8 +604,10 @@ void FlexibleInstancesScript::AddPlayerToInstance(uint32 instanceId, Player* pla
     it->second.Players.emplace(player->GetGUID());
 }
 
-void FlexibleInstancesScript::RemovePlayerFromInstance(uint32 instanceId, Player* player)
+void FlexibleInstancesScript::RemovePlayerFromInstance(Map* map, Player* player)
 {
+    uint32 instanceId = map->GetInstanceId();
+
     auto it = flexibleInstances.find(instanceId);
     if (it == flexibleInstances.end())
     {

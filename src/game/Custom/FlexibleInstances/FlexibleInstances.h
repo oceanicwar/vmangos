@@ -8,7 +8,6 @@ enum FlexibleInstancesConstants {
 };
 
 struct FlexibleInstanceTemplate {
-    uint32 MapId;
     uint32 PlayerCount;
 
     float HealthMultiplier;
@@ -19,6 +18,7 @@ struct FlexibleInstanceTemplate {
 };
 
 struct FlexibleInstance {
+    uint32 MapId;
     FlexibleInstanceTemplate const* Template;
 
     std::unordered_set<uint64> Players;
@@ -44,8 +44,8 @@ public:
     void OnLootProcessed(Loot* loot) override;
 
     bool IsFlexibleInstance(Map* map);
-    void AddPlayerToInstance(uint32 instanceId, Player* player);
-    void RemovePlayerFromInstance(uint32 instanceId, Player* player);
+    void AddPlayerToInstance(Map* map, Player* player);
+    void RemovePlayerFromInstance(Map* map, Player* player);
     uint32 GetPlayerCountForInstance(uint32 instanceId);
     const FlexibleInstanceTemplate* GetMultipliersForPlayerCount(uint32 mapId, uint32 playerCount);
 
