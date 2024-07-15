@@ -39,11 +39,11 @@ public:
     void OnLootProcessed(Loot* loot) override;
 
     bool IsFlexibleInstance(Map* map);
-    uint32 GetPlayerCountForMap(Map* map);
+    uint32 GetPlayerCountForMap(Map* map, Player* skipPlayer = nullptr);
     const FlexibleInstanceTemplate* GetTemplateForPlayerCount(uint32 mapId, uint32 playerCount);
     bool CheckTemplatesMatch(const FlexibleInstanceTemplate* template1, const FlexibleInstanceTemplate* template2);
 
-    void UpdateFlexTemplateForMap(Map* map);
+    void UpdateFlexTemplateForMap(Map* map, Player* skipPlayer = nullptr);
     void UpdateFlexTemplateForCreature(Creature* creature);
     void NotifyFlexibilityChanged(Map* map, Player* skipPlayer = nullptr);
 

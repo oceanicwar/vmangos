@@ -104,7 +104,7 @@ void FlexibleInstancesScript::OnPlayerExitMap(Player* player, Map* map)
         return;
     }
 
-    UpdateFlexTemplateForMap(map);
+    UpdateFlexTemplateForMap(map, player);
     NotifyFlexibilityChanged(map, player);
 
     sLog.Out(LOG_BASIC, LOG_LVL_BASIC, "Player '%s' left instance map '%u'.", player->GetName(), map->GetId());
@@ -568,10 +568,10 @@ bool FlexibleInstancesScript::CheckTemplatesMatch(const FlexibleInstanceTemplate
         std::fabs(template1->ItemMultiplier - template2->ItemMultiplier) < epsilon;
 }
 
-void FlexibleInstancesScript::UpdateFlexTemplateForMap(Map* map)
+void FlexibleInstancesScript::UpdateFlexTemplateForMap(Map* map, Player* skipPlayer)
 {
     // Get a fitting template for the map
-    uint32 playerCount = GetPlayerCountForMap(map);
+    uint32 playerCount = GetPlayerCountForMap(map, skipPlayer);
     auto flexTemplate = GetTemplateForPlayerCount(map->GetId(), playerCount);
 
     // Copy the template to the maps metadata (replacing old template).
@@ -643,7 +643,7 @@ bool FlexibleInstancesScript::IsFlexibleInstance(Map* map)
     return true;
 }
 
-uint32 FlexibleInstancesScript::GetPlayerCountForMap(Map* map)
+uint32 FlexibleInstancesScript::GetPlayerCountForMap(Map* map, Player* skipPlayer)
 {
     if (!map)
     {
@@ -656,6 +656,11 @@ uint32 FlexibleInstancesScript::GetPlayerCountForMap(Map* map)
     {
         auto player = playerRef.getSource();
         if (!player)
+        {
+            continue;
+        }
+
+        if (skipPlayer && skipPlayer->GetGUID() == player->GetGUID())
         {
             continue;
         }

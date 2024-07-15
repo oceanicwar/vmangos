@@ -506,6 +506,7 @@ bool Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* loot_owner, 
     m_questItems.reserve(MAX_NR_QUEST_ITEMS);
 
     tab->Process(*this, store, store.IsRatesAllowed());     // Processing is done there, callback via Loot::AddItem()
+    sActionMgr.ActionOnLootProcessed(this);
 
     if (loot_owner)
         FillPlayerDependentLoot(loot_owner, personal, looted);
@@ -1274,8 +1275,6 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, bool rate, uint8 
     // Now processing groups
     for (const auto& group : Groups)
         group.Process(loot);
-
-    sActionMgr.ActionOnLootProcessed(&loot);
 }
 
 // True if template includes at least 1 quest drop entry
