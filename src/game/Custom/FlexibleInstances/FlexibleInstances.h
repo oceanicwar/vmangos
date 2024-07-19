@@ -46,6 +46,7 @@ public:
     void UpdateFlexTemplateForMap(Map* map, Player* skipPlayer = nullptr);
     void UpdateFlexTemplateForCreature(Creature* creature);
     void NotifyFlexibilityChanged(Map* map, Player* skipPlayer = nullptr);
+    void UpdateFlexAura(Creature* creature, const FlexibleInstanceTemplate* creatureTemplate = nullptr);
 
 private:
     std::unordered_map<uint32 /* MapId */, std::unordered_map<uint32 /* PlayerCount */, FlexibleInstanceTemplate>> flexibleInstanceTemplates;

@@ -138,6 +138,9 @@ void FlexibleInstancesScript::OnCreatureUpdate(Creature* creature, uint32 update
 
     auto creatureTemplate = creature->GetMetadata<FlexibleInstanceTemplate>(MetadataFlexibleInstances);
 
+    // Check if the creatures auras need to be updated.
+    UpdateFlexAura(creature, creatureTemplate);
+
     // The creatures template matches the map template and does not need to be updated.
     if (creatureTemplate && CheckTemplatesMatch(mapTemplate, creatureTemplate))
     {
@@ -164,32 +167,13 @@ void FlexibleInstancesScript::OnCreatureUpdate(Creature* creature, uint32 update
     }
 
     UpdateFlexTemplateForCreature(creature);
+    UpdateFlexAura(creature, creatureTemplate);
 
     creatureTemplate = creature->GetMetadata<FlexibleInstanceTemplate>(MetadataFlexibleInstances);
     if (!creatureTemplate)
     {
         sLog.Out(LOG_BASIC, LOG_LVL_ERROR, "Creature '%u' flex template failed to update.", creature->GetGUID());
         return;
-    }
-
-    // Only add the special aura if the server has it patched in.
-    if (sSpellMgr.GetSpellEntry(SPELL_ENTRY_FLEXIBLE))
-    {
-        // Update the aura stacks to match the template.
-        auto aura = creature->GetAura(SPELL_ENTRY_FLEXIBLE, SpellEffectIndex::EFFECT_INDEX_0);
-        if (aura)
-        {
-            auto stacks = aura->GetStackAmount();
-            if (stacks != creatureTemplate->PlayerCount)
-            {
-                aura->GetHolder()->SetStackAmount(creatureTemplate->PlayerCount);
-            }
-        }
-        else
-        {
-            auto holder = creature->AddAura(SPELL_ENTRY_FLEXIBLE);
-            holder->SetStackAmount(creatureTemplate->PlayerCount);
-        }
     }
 
     auto creatureInfo = creature->GetCreatureInfo();
@@ -625,6 +609,45 @@ void FlexibleInstancesScript::NotifyFlexibilityChanged(Map* map, Player* skipPla
         }
 
         ChatHandler(player->GetSession()).PSendSysMessage("|cffFFD700[Flexible Instances]: |cffFFFFFFCreature damage, health, experience, gold, and item drop rates have been adjusted for a group of |cff00FF00%u|cffFFFFFF.|r", metadata->PlayerCount);
+    }
+}
+
+void FlexibleInstancesScript::UpdateFlexAura(Creature* creature, const FlexibleInstanceTemplate* creatureTemplate)
+{
+    // Only add the special aura if the server has it patched in.
+    if (!sSpellMgr.GetSpellEntry(SPELL_ENTRY_FLEXIBLE))
+    {
+        return;
+    }
+
+    if (!creature)
+    {
+        return;
+    }
+
+    if (!creatureTemplate)
+    {
+        creatureTemplate = creature->GetMetadata<FlexibleInstanceTemplate>(MetadataFlexibleInstances);
+        if (!creatureTemplate)
+        {
+            return;
+        }
+    }
+
+    // Update the aura stacks to match the template.
+    auto aura = creature->GetAura(SPELL_ENTRY_FLEXIBLE, SpellEffectIndex::EFFECT_INDEX_0);
+    if (aura)
+    {
+        auto stacks = aura->GetStackAmount();
+        if (stacks != creatureTemplate->PlayerCount)
+        {
+            aura->GetHolder()->SetStackAmount(creatureTemplate->PlayerCount);
+        }
+    }
+    else
+    {
+        auto holder = creature->AddAura(SPELL_ENTRY_FLEXIBLE);
+        holder->SetStackAmount(creatureTemplate->PlayerCount);
     }
 }
 
