@@ -111,6 +111,46 @@ bool ActionMgr::ActionOnPlayerIsSpellFitByClassAndRace(const Player* player, uin
     return result;
 }
 
+void ActionMgr::ActionOnPlayerLogin(Player* player)
+{
+    auto it = actionScripts.find(ACTION_ON_PLAYER_LOG_IN);
+    if (it == actionScripts.end())
+    {
+        return;
+    }
+
+    auto scripts = it->second;
+    if (scripts.empty())
+    {
+        return;
+    }
+
+    for (auto& script : scripts)
+    {
+        script->OnPlayerLogin(player);
+    }
+}
+
+void ActionMgr::ActionOnPlayerLogout(Player* player)
+{
+    auto it = actionScripts.find(ACTION_ON_PLAYER_LOG_OUT);
+    if (it == actionScripts.end())
+    {
+        return;
+    }
+
+    auto scripts = it->second;
+    if (scripts.empty())
+    {
+        return;
+    }
+
+    for (auto& script : scripts)
+    {
+        script->OnPlayerLogout(player);
+    }
+}
+
 void ActionMgr::ActionOnPlayerEnterMap(Player* player, Map* oldMap, Map* newMap)
 {
     auto it = actionScripts.find(ACTION_ON_PLAYER_ENTER_MAP);

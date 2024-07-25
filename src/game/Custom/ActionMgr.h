@@ -45,6 +45,12 @@ public:
     // Triggered when the core sends melee damage logs to a player.
     virtual uint32 OnSendAttackStateUpdate(CalcDamageInfo const* log) { return 0; }
 
+    // Triggered when a player logs in.
+    virtual void OnPlayerLogin(Player* player) { }
+
+    // Triggered when a player logs out.
+    virtual void OnPlayerLogout(Player* player) { }
+
     // Triggered when a player enters a map.
     virtual void OnPlayerEnterMap(Player* player, Map* oldMap, Map* newMap) { }
 
@@ -104,27 +110,30 @@ enum ActionTypes : uint32
     ACTION_ON_PLAYER_CAST_SPELL = 1,
     ACTION_ON_PLAYER_SPELL_FIT_CLASS_RACE = 2,
 
-    ACTION_ON_PLAYER_ENTER_MAP = 3,
-    ACTION_ON_PLAYER_EXIT_MAP = 4,
+    ACTION_ON_PLAYER_LOG_IN = 3,
+    ACTION_ON_PLAYER_LOG_OUT = 4,
 
-    ACTION_ON_PLAYER_GAIN_EXP = 5,
+    ACTION_ON_PLAYER_ENTER_MAP = 5,
+    ACTION_ON_PLAYER_EXIT_MAP = 6,
 
-    ACTION_ON_UNIT_DAMAGE = 6,
-    ACTION_ON_UNIT_DAMAGE_PERIODIC = 7,
+    ACTION_ON_PLAYER_GAIN_EXP = 7,
 
-    ACTION_ON_CREATURE_UPDATE = 8,
+    ACTION_ON_UNIT_DAMAGE = 8,
+    ACTION_ON_UNIT_DAMAGE_PERIODIC = 9,
 
-    ACTION_ON_SEND_SPELL_DAMAGE_LOG = 9,
-    ACTION_ON_SEND_ATTACK_STATE_UPDATE = 10,
+    ACTION_ON_CREATURE_UPDATE = 10,
 
-    ACTION_ON_LOOT_GENERATE_MONEY = 11,
-    ACTION_ON_LOOT_PROCESSED = 12,
+    ACTION_ON_SEND_SPELL_DAMAGE_LOG = 11,
+    ACTION_ON_SEND_ATTACK_STATE_UPDATE = 12,
 
-    ACTION_ON_ACTIONSCRIPT_INITIALIZE = 13,
+    ACTION_ON_LOOT_GENERATE_MONEY = 13,
+    ACTION_ON_LOOT_PROCESSED = 14,
 
-    ACTION_ON_AFTER_CONFIG_LOADED = 14,
+    ACTION_ON_ACTIONSCRIPT_INITIALIZE = 15,
 
-    ACTION_TYPES_END = 15
+    ACTION_ON_AFTER_CONFIG_LOADED = 16,
+
+    ACTION_TYPES_END = 17
 };
 
 class ActionMgr
@@ -139,6 +148,9 @@ public:
     void ActionOnPlayerUseItem(Player* player, Item* item);
     void ActionOnPlayerCastSpell(Player* player, Spell* spell);
     bool ActionOnPlayerIsSpellFitByClassAndRace(const Player* player, uint32 spellId);
+
+    void ActionOnPlayerLogin(Player* player);
+    void ActionOnPlayerLogout(Player* player);
 
     void ActionOnPlayerEnterMap(Player* player, Map* oldMap, Map* newMap);
     void ActionOnPlayerExitMap(Player* player, Map* map);

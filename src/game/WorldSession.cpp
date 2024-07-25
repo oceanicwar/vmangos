@@ -49,6 +49,8 @@
 
 #include <openssl/md5.h>
 
+#include "ActionMgr.h"
+
 // select opcodes appropriate for processing in Map::Update context for current session state
 static bool MapSessionFilterHelper(WorldSession* session, OpcodeHandler const& opHandle)
 {
@@ -644,6 +646,8 @@ void WorldSession::LogoutPlayer(bool Save)
 
     if (_player)
     {
+        sActionMgr.ActionOnPlayerLogout(_player);
+
         bool inWorld = _player->IsInWorld() && _player->FindMap();
 
         sLog.Player(this, LOG_CHAR, "Logout", LOG_LVL_DETAIL, "");

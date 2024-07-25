@@ -1,0 +1,16 @@
+#ifndef _CUSTOM_PLAYER_ANNOUNCER_H
+#define _CUSTOM_PLAYER_ANNOUNCER_H
+
+#include "ActionMgr.h"
+
+class PlayerAnnouncerScript : public ActionScript
+{
+public:
+    PlayerAnnouncerScript() : ActionScript("PlayerAnnouncerScript") { }
+
+public:
+    void OnPlayerLogin(Player* player) override;
+    void OnPlayerLogout(Player* player) override;
+};
+
+#endif

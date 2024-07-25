@@ -2632,6 +2632,7 @@ void Player::AddToWorld()
         if (m_items[i])
             m_items[i]->AddToWorld();
     }
+
     sPlayerBotMgr.OnPlayerInWorld(this);
 }
 

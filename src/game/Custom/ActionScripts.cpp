@@ -1,6 +1,7 @@
 #include "ActionMgr.h"
 
 #include "FlexibleInstances/FlexibleInstances.h"
+#include "PlayerAnnouncer/PlayerAnnouncer.h"
 
 // Register your action scripts using this function.
 void ActionMgr::Inititalize()
@@ -17,5 +18,10 @@ void ActionMgr::Inititalize()
         ACTION_ON_LOOT_GENERATE_MONEY,
         ACTION_ON_LOOT_PROCESSED,
         ACTION_ON_AFTER_CONFIG_LOADED
+    });
+
+    sActionMgr.RegisterActions(new PlayerAnnouncerScript(), {
+        ACTION_ON_PLAYER_LOG_IN,
+        ACTION_ON_PLAYER_LOG_OUT
     });
 }

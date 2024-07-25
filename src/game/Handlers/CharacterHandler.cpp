@@ -46,6 +46,8 @@
 #include "PlayerBotMgr.h"
 #include "AccountMgr.h"
 
+#include "ActionMgr.h"
+
 class LoginQueryHolder : public SqlQueryHolder
 {
 private:
@@ -753,6 +755,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder *holder)
     if (sWorld.getConfig(CONFIG_BOOL_SEND_LOOT_ROLL_UPON_RECONNECT) && alreadyOnline)
         if (Group* pGroup = pCurrChar->GetGroup())
             pGroup->SendLootStartRollsForPlayer(pCurrChar);
+
+    sActionMgr.ActionOnPlayerLogin(pCurrChar);
 }
 
 void WorldSession::HandleSetFactionAtWarOpcode(WorldPacket& recv_data)
