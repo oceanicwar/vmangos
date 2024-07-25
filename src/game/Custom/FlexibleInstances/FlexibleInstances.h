@@ -22,10 +22,12 @@ struct FlexibleInstanceTemplate {
 class FlexibleInstancesScript : public ActionScript
 {
 public:
-    FlexibleInstancesScript() : ActionScript("FlexibleInstancesScript") { }
+    FlexibleInstancesScript() : ActionScript("FlexibleInstances") { }
 
 public:
     void OnAfterConfigLoaded(bool reload) override;
+    void OnAfterActionsLoaded(bool reload) override;
+    void LoadFlexTemplates(bool reload);
 
     void OnPlayerEnterMap(Player* player, Map* oldMap, Map* newMap) override;
     void OnPlayerExitMap(Player* player, Map* map) override;

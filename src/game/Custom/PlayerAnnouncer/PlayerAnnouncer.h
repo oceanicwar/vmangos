@@ -6,7 +6,7 @@
 class PlayerAnnouncerScript : public ActionScript
 {
 public:
-    PlayerAnnouncerScript() : ActionScript("PlayerAnnouncerScript") { }
+    PlayerAnnouncerScript() : ActionScript("PlayerAnnouncer") { }
 
 public:
     void OnPlayerLogin(Player* player) override;

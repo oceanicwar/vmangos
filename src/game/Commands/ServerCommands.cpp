@@ -1023,6 +1023,15 @@ bool ChatHandler::HandleReloadConfigCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleReloadActionsCommand(char* /*args*/)
+{
+    sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "Re-Loading action scripts...");
+    sActionMgr.Inititalize(true);
+    sActionMgr.ActionOnAfterActionsLoaded(true);
+    SendSysMessage("Action scripts reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleReloadAreaTriggerTavernCommand(char* /*args*/)
 {
     sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "Re-Loading Tavern Area Triggers...");

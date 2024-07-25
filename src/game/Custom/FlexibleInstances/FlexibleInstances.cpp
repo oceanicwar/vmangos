@@ -7,6 +7,19 @@
 
 void FlexibleInstancesScript::OnAfterConfigLoaded(bool reload)
 {
+    LoadFlexTemplates(reload);
+}
+
+void FlexibleInstancesScript::OnAfterActionsLoaded(bool reload)
+{
+    if (reload)
+    {
+        LoadFlexTemplates(reload);
+    }
+}
+
+void FlexibleInstancesScript::LoadFlexTemplates(bool reload)
+{
     if (reload)
     {
         sLog.Out(LOG_BASIC, LOG_LVL_BASIC, "Reloading Flexible Instance Templates..");

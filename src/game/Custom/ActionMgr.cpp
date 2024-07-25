@@ -27,8 +27,46 @@ ActionMgr::~ActionMgr()
     actionScripts.clear();
 }
 
+void ActionMgr::LoadActionScriptsEnabled()
+{
+    uint32 count = 0;
+    auto result = WorldDatabase.PQuery("SELECT * FROM actions_enabled");
+
+    if (result)
+    {
+        do
+        {
+            auto fields = result->Fetch();
+
+            std::string scriptName = fields[0].GetString();
+            bool enabled = fields[1].GetBool();
+
+            actionScriptsEnabled.emplace(scriptName, enabled);
+
+            count++;
+        } while (result->NextRow());
+    }
+}
+
+bool ActionMgr::IsActionScriptEnabled(std::string scriptName)
+{
+    auto it = actionScriptsEnabled.find(scriptName);
+    if (it == actionScriptsEnabled.end())
+    {
+        return false;
+    }
+
+    return it->second;
+}
+
 void ActionMgr::RegisterActions(ActionScript* script, std::vector<uint32> actions)
 {
+    if (!IsActionScriptEnabled(script->GetName()))
+    {
+        delete script;
+        return;
+    }
+
     for(auto it = actions.begin(); it != actions.end(); ++it)
     {
         uint32 actionType = (*it);
@@ -345,7 +383,7 @@ void ActionMgr::ActionOnLootProcessed(Loot* loot)
     }
 }
 
-void ActionMgr::ActionOnAfterConfigLoaded(bool reload)
+void ActionMgr::ActionOnAfterConfigLoaded(bool reload /* = false */)
 {
     auto it = actionScripts.find(ACTION_ON_AFTER_CONFIG_LOADED);
     if (it == actionScripts.end())
@@ -362,6 +400,26 @@ void ActionMgr::ActionOnAfterConfigLoaded(bool reload)
     for (auto& script : scripts)
     {
         script->OnAfterConfigLoaded(reload);
+    }
+}
+
+void ActionMgr::ActionOnAfterActionsLoaded(bool reload /* = false */)
+{
+    auto it = actionScripts.find(ACTION_ON_AFTER_ACTIONS_LOADED);
+    if (it == actionScripts.end())
+    {
+        return;
+    }
+
+    auto scripts = it->second;
+    if (scripts.empty())
+    {
+        return;
+    }
+
+    for (auto& script : scripts)
+    {
+        script->OnAfterActionsLoaded(reload);
     }
 }
 
@@ -382,25 +440,5 @@ void ActionMgr::ActionOnCreatureUpdate(Creature* creature, uint32 update_diff, u
     for (auto& script : scripts)
     {
         script->OnCreatureUpdate(creature, update_diff, diff);
-    }
-}
-
-void ActionMgr::ActionOnInitializeActionScript()
-{
-    auto it = actionScripts.find(ACTION_ON_ACTIONSCRIPT_INITIALIZE);
-    if (it == actionScripts.end())
-    {
-        return;
-    }
-
-    auto scripts = it->second;
-    if (scripts.empty())
-    {
-        return;
-    }
-
-    for (auto& script : scripts)
-    {
-        script->OnInitializeActionScript();
     }
 }

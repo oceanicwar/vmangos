@@ -1303,7 +1303,7 @@ void World::SetInitialWorldSettings()
     // Initialize the ActionScripts early so they can access early hooks.
     sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "Initializing Action Scripts...");
     sActionMgr.Inititalize();
-    sActionMgr.ActionOnInitializeActionScript();
+    sActionMgr.ActionOnAfterActionsLoaded();
     sLog.Out(LOG_BASIC, LOG_LVL_MINIMAL, "");
 
     // Initialize config settings

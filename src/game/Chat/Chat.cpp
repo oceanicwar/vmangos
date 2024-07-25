@@ -797,6 +797,7 @@ ChatCommand * ChatHandler::getCommandTable()
 
         { "anticheat",      SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleReloadAnticheatCommand,     "", nullptr },
         { "config",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleReloadConfigCommand,        "", nullptr },
+        { "actions",        SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleReloadActionsCommand,       "", nullptr },
 
         { "areatrigger_involvedrelation", SEC_DEVELOPER,     true,  &ChatHandler::HandleReloadQuestAreaTriggersCommand,       "", nullptr },
         { "areatrigger_tavern",           SEC_DEVELOPER,     true,  &ChatHandler::HandleReloadAreaTriggerTavernCommand,       "", nullptr },

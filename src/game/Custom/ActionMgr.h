@@ -21,13 +21,6 @@ public:
         _name = name;
     }
 
-    /* ==================== SCRIPT HOOKS ==================== */
-
-    // Triggered when the world settings are initially loaded.
-    virtual void OnInitializeActionScript() { }
-
-    /* ====================================================== */
-
     /* ==================== PLAYER HOOKS ==================== */
 
     // Triggered when a player uses an item.
@@ -91,7 +84,11 @@ public:
 
     /* ===================== MISC HOOKS ===================== */
 
+    // Called after config re/loaded.
     virtual void OnAfterConfigLoaded(bool reload) { }
+
+    // Called after action scripts re/loaded.
+    virtual void OnAfterActionsLoaded(bool reload) { }
 
     /* ====================================================== */
 
@@ -129,9 +126,8 @@ enum ActionTypes : uint32
     ACTION_ON_LOOT_GENERATE_MONEY = 13,
     ACTION_ON_LOOT_PROCESSED = 14,
 
-    ACTION_ON_ACTIONSCRIPT_INITIALIZE = 15,
-
-    ACTION_ON_AFTER_CONFIG_LOADED = 16,
+    ACTION_ON_AFTER_CONFIG_LOADED = 15,
+    ACTION_ON_AFTER_ACTIONS_LOADED = 16,
 
     ACTION_TYPES_END = 17
 };
@@ -142,7 +138,9 @@ public:
     ActionMgr();
     ~ActionMgr();
 
-    void Inititalize();
+    void Inititalize(bool reload = false);
+    void LoadActionScriptsEnabled();
+    bool IsActionScriptEnabled(std::string scriptName);
     void RegisterActions(ActionScript* script, std::vector<uint32> actions);
 
     void ActionOnPlayerUseItem(Player* player, Item* item);
@@ -162,18 +160,18 @@ public:
 
     void ActionOnCreatureUpdate(Creature* creature, uint32 update_diff, uint32 diff);
 
-    void ActionOnInitializeActionScript();
-
     uint32 ActionOnSendSpellDamageLog(SpellNonMeleeDamage const* log);
     uint32 ActionOnSendAttackStateUpdate(CalcDamageInfo const* log);
 
     void ActionOnGenerateLootMoney(Loot* loot, uint32& money);
     void ActionOnLootProcessed(Loot* loot);
 
-    void ActionOnAfterConfigLoaded(bool reload);
+    void ActionOnAfterConfigLoaded(bool reload = false);
+    void ActionOnAfterActionsLoaded(bool reload = false);
 
 private:
     std::map<uint32, std::vector<ActionScript*>> actionScripts;
+    std::map<std::string, bool> actionScriptsEnabled;
 };
 
 #define sActionMgr MaNGOS::Singleton<ActionMgr>::Instance()

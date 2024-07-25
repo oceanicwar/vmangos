@@ -3,9 +3,22 @@
 #include "FlexibleInstances/FlexibleInstances.h"
 #include "PlayerAnnouncer/PlayerAnnouncer.h"
 
-// Register your action scripts using this function.
-void ActionMgr::Inititalize()
+void ActionMgr::Inititalize(bool reload /* = false */)
 {
+    if (reload)
+    {
+        actionScripts.clear();
+        actionScriptsEnabled.clear();
+
+        // Re-fill the action scripts map with empty action types.
+        for (uint32 i = 0; i < ACTION_TYPES_END; ++i)
+        {
+            actionScripts.emplace(i, std::vector<ActionScript*>());
+        }
+    }
+
+    LoadActionScriptsEnabled();
+
     sActionMgr.RegisterActions(new FlexibleInstancesScript(), {
         ACTION_ON_PLAYER_ENTER_MAP,
         ACTION_ON_PLAYER_EXIT_MAP,
@@ -17,7 +30,8 @@ void ActionMgr::Inititalize()
         ACTION_ON_SEND_ATTACK_STATE_UPDATE,
         ACTION_ON_LOOT_GENERATE_MONEY,
         ACTION_ON_LOOT_PROCESSED,
-        ACTION_ON_AFTER_CONFIG_LOADED
+        ACTION_ON_AFTER_CONFIG_LOADED,
+        ACTION_ON_AFTER_ACTIONS_LOADED
     });
 
     sActionMgr.RegisterActions(new PlayerAnnouncerScript(), {

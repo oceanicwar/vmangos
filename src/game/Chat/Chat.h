@@ -795,6 +795,7 @@ class ChatHandler
         bool HandleReloadAllLocalesCommand(char* args);
 
         bool HandleReloadConfigCommand(char* args);
+        bool HandleReloadActionsCommand(char* args);
 
         bool HandleReloadAreaTriggerTavernCommand(char* args);
         bool HandleReloadAreaTriggerTeleportCommand(char* args);
