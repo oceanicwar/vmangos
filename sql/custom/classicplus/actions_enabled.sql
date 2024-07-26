@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS `actions_enabled` (
-  `script_name` varchar(50) COLLATE armscii8_bin NOT NULL DEFAULT '',
+  `script_name` varchar(50) CHARACTER SET armscii8 COLLATE armscii8_bin NOT NULL DEFAULT '',
   `enabled` tinyint(4) DEFAULT '1',
   PRIMARY KEY (`script_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=armscii8 COLLATE=armscii8_bin;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 DELETE FROM `actions_enabled`;
 INSERT INTO `actions_enabled` (`script_name`, `enabled`) VALUES
