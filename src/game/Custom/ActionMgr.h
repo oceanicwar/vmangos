@@ -6,6 +6,8 @@
 #include "Policies/Singleton.h"
 #include "Spell.h"
 
+#include "ActionScriptConfig.h"
+
 // Used by the OnPlayerGainExperience hook to determine XP source.
 enum XPSource {
     XP_SOURCE_EXPLORATION = 0,
@@ -97,8 +99,19 @@ public:
         return _name;
     }
 
+    void SetConfig(ActionScriptConfig config)
+    {
+        this->config = config;
+    }
+
+    ActionScriptConfig* GetConfig()
+    {
+        return &this->config;
+    }
+
 private:
     const char* _name;
+    ActionScriptConfig config;
 };
 
 enum ActionTypes : uint32
@@ -140,6 +153,7 @@ public:
 
     void Inititalize(bool reload = false);
     void LoadActionScriptsEnabled();
+    void LoadActionScriptsConfig();
     bool IsActionScriptEnabled(std::string scriptName);
     void RegisterActions(ActionScript* script, std::vector<uint32> actions);
 
@@ -170,8 +184,9 @@ public:
     void ActionOnAfterActionsLoaded(bool reload = false);
 
 private:
-    std::map<uint32, std::vector<ActionScript*>> actionScripts;
-    std::map<std::string, bool> actionScriptsEnabled;
+    std::unordered_map<uint32, std::vector<ActionScript*>> actionScripts;
+    std::unordered_map<std::string, bool> actionScriptsEnabled;
+    std::unordered_map<std::string, std::unordered_map<std::string, std::string>> actionScriptsConfig;
 };
 
 #define sActionMgr MaNGOS::Singleton<ActionMgr>::Instance()

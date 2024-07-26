@@ -11,8 +11,14 @@ void PlayerAnnouncerScript::OnPlayerLogin(Player* player)
         return;
     }
 
-    char message[200];
-    sprintf(message, "|cff00FF00[ |cffFFFFFFWorld |cff00FF00]: |cffFFFFFFPlayer %s%s |cffFFFFFFhas entered the world.|r", ActionScriptHelper::GetPlayerClassColor(player), player->GetName());
+    char playerName[32];
+    sprintf(playerName, "%s%s", ActionScriptHelper::GetPlayerClassColor(player), player->GetName());
+
+    auto format = this->GetConfig()->GetValue<std::string>("Login.Format");
+
+    char message[256 + 32];
+    sprintf(message, format.c_str(), playerName);
+
     ActionScriptHelper::AnnounceToAll(message, player);
 }
 
@@ -23,7 +29,13 @@ void PlayerAnnouncerScript::OnPlayerLogout(Player* player)
         return;
     }
 
-    char message[200];
-    sprintf(message, "|cffFF0000[ |cffFFFFFFWorld |cffFF0000]: |cffFFFFFFPlayer %s%s |cffFFFFFFhas left the world.|r", ActionScriptHelper::GetPlayerClassColor(player), player->GetName());
+    char playerName[32];
+    sprintf(playerName, "%s%s", ActionScriptHelper::GetPlayerClassColor(player), player->GetName());
+
+    auto format = this->GetConfig()->GetValue<std::string>("Logout.Format");
+
+    char message[256 + 32];
+    sprintf(message, format.c_str(), playerName);
+
     ActionScriptHelper::AnnounceToAll(message, player);
 }

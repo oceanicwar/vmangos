@@ -9,6 +9,7 @@ void ActionMgr::Inititalize(bool reload /* = false */)
     {
         actionScripts.clear();
         actionScriptsEnabled.clear();
+        actionScriptsConfig.clear();
 
         // Re-fill the action scripts map with empty action types.
         for (uint32 i = 0; i < ACTION_TYPES_END; ++i)
@@ -18,6 +19,7 @@ void ActionMgr::Inititalize(bool reload /* = false */)
     }
 
     LoadActionScriptsEnabled();
+    LoadActionScriptsConfig();
 
     sActionMgr.RegisterActions(new FlexibleInstancesScript(), {
         ACTION_ON_PLAYER_ENTER_MAP,

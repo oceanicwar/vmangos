@@ -48,6 +48,42 @@ void ActionMgr::LoadActionScriptsEnabled()
     }
 }
 
+void ActionMgr::LoadActionScriptsConfig()
+{
+    uint32 count = 0;
+    auto result = WorldDatabase.PQuery("SELECT * FROM actions_config");
+
+    if (result)
+    {
+        do
+        {
+            auto fields = result->Fetch();
+
+            std::string scriptName = fields[0].GetString();
+            std::string key = fields[1].GetString();
+            std::string value = fields[2].GetString();
+
+            auto it = actionScriptsConfig.find(scriptName);
+            if (it == actionScriptsConfig.end())
+            {
+                std::unordered_map<std::string, std::string> configMap;
+                auto result = actionScriptsConfig.emplace(scriptName, configMap);
+
+                if (!result.second)
+                {
+                    continue;
+                }
+
+                it = result.first;
+            }
+
+            it->second.emplace(key, value);
+
+            count++;
+        } while (result->NextRow());
+    }
+}
+
 bool ActionMgr::IsActionScriptEnabled(std::string scriptName)
 {
     auto it = actionScriptsEnabled.find(scriptName);
@@ -79,6 +115,13 @@ void ActionMgr::RegisterActions(ActionScript* script, std::vector<uint32> action
         }
 
         action->second.push_back(script);
+    }
+
+    auto it = actionScriptsConfig.find(script->GetName());
+    if (it != actionScriptsConfig.end())
+    {
+        ActionScriptConfig config(it->second);
+        script->SetConfig(config);
     }
 }
 
