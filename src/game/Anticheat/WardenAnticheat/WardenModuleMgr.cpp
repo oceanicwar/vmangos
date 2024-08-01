@@ -70,6 +70,12 @@ WardenModuleMgr::WardenModuleMgr()
     auto const moduleDir = sWorld.GetWardenModuleDirectory();
     auto const modules = GetModuleNames(moduleDir);
 
+    if (modules.empty())
+    {
+        sLog.Out(LOG_ANTICHEAT, LOG_LVL_ERROR, "No Warden modules were detected but AntiCheat is enabled.");
+        return;
+    }
+
     for (auto const& mod : modules)
     {
         auto const key = mod.substr(0, mod.length() - 3) + "key";
