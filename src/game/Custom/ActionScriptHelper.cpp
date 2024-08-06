@@ -11,28 +11,28 @@ const char* ActionScriptHelper::GetPlayerClassColor(Player* player)
         return "|cffC79D6E";
         break;
     case CLASS_PALADIN:
-        return "|cffC79D6E";
+        return "|cffF68CB9";
         break;
     case CLASS_HUNTER:
-        return "|cffC79D6E";
+        return "|cffABD474";
         break;
     case CLASS_ROGUE:
-        return "|cffC79D6E";
+        return "|cffFEF569";
         break;
     case CLASS_PRIEST:
-        return "|cffC79D6E";
+        return "|cffFFFFFF";
         break;
     case CLASS_SHAMAN:
-        return "|cffC79D6E";
+        return "|cff0070DE";
         break;
     case CLASS_MAGE:
-        return "|cffC79D6E";
+        return "|cff40C7EC";
         break;
     case CLASS_WARLOCK:
         return "|cffC79D6E";
         break;
     case CLASS_DRUID:
-        return "|cffC79D6E";
+        return "|cffFF7E0A";
         break;
     }
 
