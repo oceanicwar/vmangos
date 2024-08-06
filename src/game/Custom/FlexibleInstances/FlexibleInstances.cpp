@@ -147,6 +147,12 @@ void FlexibleInstancesScript::OnCreatureUpdate(Creature* creature, uint32 update
         return;
     }
 
+    // Do not scale player minions.
+    if (creature->IsCharmed() && creature->GetCharmerOrOwnerPlayer()->IsPlayer())
+    {
+        return;
+    }
+
     auto mapTemplate = map->GetMetadata<FlexibleInstanceTemplate>(MetadataFlexibleInstances);
 
     // The map does not have a flex template.
