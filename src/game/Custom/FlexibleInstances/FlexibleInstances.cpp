@@ -141,6 +141,12 @@ void FlexibleInstancesScript::OnCreatureUpdate(Creature* creature, uint32 update
         return;
     }
 
+    // Do not scale player pets.
+    if (creature->IsPet() && creature->GetOwnerPlayer())
+    {
+        return;
+    }
+
     auto mapTemplate = map->GetMetadata<FlexibleInstanceTemplate>(MetadataFlexibleInstances);
 
     // The map does not have a flex template.
