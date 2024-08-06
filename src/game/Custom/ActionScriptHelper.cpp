@@ -36,7 +36,7 @@ const char* ActionScriptHelper::GetPlayerClassColor(Player* player)
         break;
     }
 
-    return "|cffFFFFFF";
+    return "|r";
 }
 
 void ActionScriptHelper::AnnounceToAll(const char* message, Player* ignorePlayer /* = nullptr */)
