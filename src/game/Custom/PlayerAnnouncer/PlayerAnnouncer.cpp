@@ -4,7 +4,7 @@
 
 #include "Chat.h"
 
-void PlayerAnnouncerScript::OnPlayerLogin(Player* player)
+void PlayerAnnouncerScript::OnPlayerLogin(Player* player, bool firstLogin)
 {
     if (!player)
     {
@@ -14,7 +14,7 @@ void PlayerAnnouncerScript::OnPlayerLogin(Player* player)
     char playerName[32];
     sprintf(playerName, "%s%s", ActionScriptHelper::GetPlayerClassColor(player), player->GetName());
 
-    auto format = this->GetConfig()->GetValue<std::string>("Login.Format");
+    auto format = this->GetConfig()->GetValue<std::string>(firstLogin ? "FirstLogin.Format" : "Login.Format");
 
     char message[256 + 32];
     sprintf(message, format.c_str(), playerName);

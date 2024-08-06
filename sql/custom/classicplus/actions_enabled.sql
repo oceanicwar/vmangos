@@ -5,6 +5,6 @@ CREATE TABLE IF NOT EXISTS `actions_enabled` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 DELETE FROM `actions_enabled`;
-INSERT INTO `actions_enabled` (`script_name`, `enabled`) VALUES
-	('FlexibleInstances', 1),
-	('PlayerAnnouncer', 1);
+INSERT INTO `actions_enabled` (`script_name`, `enabled`) VALUES ('FlexibleInstances', 1);
+INSERT INTO `actions_enabled` (`script_name`, `enabled`) VALUES ('PlayerAnnouncer', 1);
+INSERT INTO `actions_enabled` (`script_name`, `enabled`) VALUES ('AutoGuild', 1);

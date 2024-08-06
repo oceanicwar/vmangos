@@ -610,9 +610,12 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder *holder)
     pCurrChar->SendInitialPacketsBeforeAddToMap();
     GetMasterPlayer()->SendInitialActionButtons();
 
+    bool firstLogin = false;
     // Show cinematic at the first time that player login
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_FIRST) && !sWorld.getConfig(CONFIG_BOOL_SKIP_CINEMATICS))
     {
+        firstLogin = true;
+
         if (ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(pCurrChar->GetRace()))
             pCurrChar->SendCinematicStart(rEntry->CinematicSequence);
     }
@@ -756,7 +759,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder *holder)
         if (Group* pGroup = pCurrChar->GetGroup())
             pGroup->SendLootStartRollsForPlayer(pCurrChar);
 
-    sActionMgr.ActionOnPlayerLogin(pCurrChar);
+    sActionMgr.ActionOnPlayerLogin(pCurrChar, firstLogin);
 }
 
 void WorldSession::HandleSetFactionAtWarOpcode(WorldPacket& recv_data)

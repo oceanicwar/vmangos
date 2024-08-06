@@ -9,7 +9,7 @@ public:
     PlayerAnnouncerScript() : ActionScript("PlayerAnnouncer") { }
 
 public:
-    void OnPlayerLogin(Player* player) override;
+    void OnPlayerLogin(Player* player, bool firstLogin) override;
     void OnPlayerLogout(Player* player) override;
 };
 

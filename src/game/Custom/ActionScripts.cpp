@@ -1,5 +1,6 @@
 #include "ActionMgr.h"
 
+#include "AutoGuild/AutoGuild.h"
 #include "FlexibleInstances/FlexibleInstances.h"
 #include "PlayerAnnouncer/PlayerAnnouncer.h"
 
@@ -20,6 +21,10 @@ void ActionMgr::Inititalize(bool reload /* = false */)
 
     LoadActionScriptsEnabled();
     LoadActionScriptsConfig();
+
+    sActionMgr.RegisterActions(new AutoGuildScript(), {
+        ACTION_ON_PLAYER_LOG_IN
+    });
 
     sActionMgr.RegisterActions(new FlexibleInstancesScript(), {
         ACTION_ON_PLAYER_ENTER_MAP,

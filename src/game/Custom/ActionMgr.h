@@ -41,7 +41,7 @@ public:
     virtual uint32 OnSendAttackStateUpdate(CalcDamageInfo const* log) { return 0; }
 
     // Triggered when a player logs in.
-    virtual void OnPlayerLogin(Player* player) { }
+    virtual void OnPlayerLogin(Player* player, bool firstLogin) { }
 
     // Triggered when a player logs out.
     virtual void OnPlayerLogout(Player* player) { }
@@ -161,7 +161,7 @@ public:
     void ActionOnPlayerCastSpell(Player* player, Spell* spell);
     bool ActionOnPlayerIsSpellFitByClassAndRace(const Player* player, uint32 spellId);
 
-    void ActionOnPlayerLogin(Player* player);
+    void ActionOnPlayerLogin(Player* player, bool firstLogin);
     void ActionOnPlayerLogout(Player* player);
 
     void ActionOnPlayerEnterMap(Player* player, Map* oldMap, Map* newMap);

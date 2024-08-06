@@ -192,7 +192,7 @@ bool ActionMgr::ActionOnPlayerIsSpellFitByClassAndRace(const Player* player, uin
     return result;
 }
 
-void ActionMgr::ActionOnPlayerLogin(Player* player)
+void ActionMgr::ActionOnPlayerLogin(Player* player, bool firstLogin)
 {
     auto it = actionScripts.find(ACTION_ON_PLAYER_LOG_IN);
     if (it == actionScripts.end())
@@ -208,7 +208,7 @@ void ActionMgr::ActionOnPlayerLogin(Player* player)
 
     for (auto& script : scripts)
     {
-        script->OnPlayerLogin(player);
+        script->OnPlayerLogin(player, firstLogin);
     }
 }
 
