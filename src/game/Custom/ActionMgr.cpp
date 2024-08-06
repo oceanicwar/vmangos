@@ -89,8 +89,11 @@ bool ActionMgr::IsActionScriptEnabled(std::string scriptName)
     auto it = actionScriptsEnabled.find(scriptName);
     if (it == actionScriptsEnabled.end())
     {
+        sLog.Out(LOG_BASIC, LOG_LVL_ERROR, "No entry was found for '%s' in actions_enabled. Disabling script.", scriptName);
         return false;
     }
+
+    sLog.Out(LOG_BASIC, LOG_LVL_BASIC, it->second ? "Action Script '%s' enabled." : "Action Script '%s' disabled.", scriptName);
 
     return it->second;
 }
