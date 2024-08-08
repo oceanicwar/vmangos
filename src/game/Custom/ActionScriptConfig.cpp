@@ -53,6 +53,7 @@ const std::string* ActionScriptConfig::GetValueInternal(const char* key)
     auto it = config.find(key);
     if (it == config.end())
     {
+        sLog.Out(LogType::LOG_BASIC, LogLevel::LOG_LVL_ERROR, "No config key '%s' was found for action script '%s'.", key, name);
         return nullptr;
     }
 

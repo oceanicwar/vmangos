@@ -5,7 +5,7 @@ class ActionScriptConfig
 {
 public:
     ActionScriptConfig() { }
-    ActionScriptConfig(std::unordered_map<std::string, std::string> map) : config(map) { }
+    ActionScriptConfig(std::string name, std::unordered_map<std::string, std::string> map) : config(map), name(name) { }
 
     template <typename T>
     const T GetValue(const char* key);
@@ -14,6 +14,7 @@ private:
     const std::string* GetValueInternal(const char* key);
 
 private:
+    std::string name;
     std::unordered_map<std::string, std::string> config;
 };
 

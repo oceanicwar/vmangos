@@ -123,7 +123,7 @@ void ActionMgr::RegisterActions(ActionScript* script, std::vector<uint32> action
     auto it = actionScriptsConfig.find(script->GetName());
     if (it != actionScriptsConfig.end())
     {
-        ActionScriptConfig config(it->second);
+        ActionScriptConfig config(script->GetName(), it->second);
         script->SetConfig(config);
     }
 }
