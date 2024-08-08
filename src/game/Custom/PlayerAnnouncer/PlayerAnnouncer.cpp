@@ -16,10 +16,25 @@ void PlayerAnnouncerScript::OnPlayerLogin(Player* player, bool firstLogin)
 
     auto format = this->GetConfig()->GetValue<std::string>(firstLogin ? "FirstLogin.Format" : "Login.Format");
 
-    char message[256 + 32];
-    sprintf(message, format.c_str(), playerName);
+    auto securityLevel = player->GetSession()->GetSecurity();
 
-    ActionScriptHelper::AnnounceToAll(message, player);
+    if (this->GetConfig()->GetValue<bool>("Login.AnnounceStaff") &&
+        securityLevel > 1)
+    {
+        format = this->GetConfig()->GetValue<std::string>("Login.AnnounceStaff.Format");
+
+        if (!ActionScriptHelper::ReplaceString(format, "$security", ActionScriptHelper::GetSecurityName(securityLevel)))
+        {
+            sLog.Out(LogType::LOG_BASIC, LogLevel::LOG_LVL_ERROR, "$security was not found in 'Login.AnnounceStaff.Format'.");
+        }
+    }
+
+    if (!ActionScriptHelper::ReplaceString(format, "$name", player->GetName()))
+    {
+        sLog.Out(LogType::LOG_BASIC, LogLevel::LOG_LVL_ERROR, "$name was not found in 'Login.AnnounceStaff.Format'.");
+    }
+
+    ActionScriptHelper::AnnounceToAll(format.c_str(), player);
 }
 
 void PlayerAnnouncerScript::OnPlayerLogout(Player* player)
@@ -34,8 +49,23 @@ void PlayerAnnouncerScript::OnPlayerLogout(Player* player)
 
     auto format = this->GetConfig()->GetValue<std::string>("Logout.Format");
 
-    char message[256 + 32];
-    sprintf(message, format.c_str(), playerName);
+    auto securityLevel = player->GetSession()->GetSecurity();
 
-    ActionScriptHelper::AnnounceToAll(message, player);
+    if (this->GetConfig()->GetValue<bool>("Logout.AnnounceStaff") &&
+        securityLevel > 1)
+    {
+        format = this->GetConfig()->GetValue<std::string>("Logout.AnnounceStaff.Format");
+
+        if (!ActionScriptHelper::ReplaceString(format, "$security", ActionScriptHelper::GetSecurityName(securityLevel)))
+        {
+            sLog.Out(LogType::LOG_BASIC, LogLevel::LOG_LVL_ERROR, "$security was not found in 'Logout.AnnounceStaff.Format'.");
+        }
+    }
+
+    if (!ActionScriptHelper::ReplaceString(format, "$name", player->GetName()))
+    {
+        sLog.Out(LogType::LOG_BASIC, LogLevel::LOG_LVL_ERROR, "$name was not found in 'Logout.AnnounceStaff.Format'.");
+    }
+
+    ActionScriptHelper::AnnounceToAll(format.c_str(), player);
 }

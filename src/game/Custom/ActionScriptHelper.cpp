@@ -67,3 +67,46 @@ void ActionScriptHelper::AnnounceToAll(const char* message, Player* ignorePlayer
         ChatHandler(session).SendSysMessage(message);
     }
 }
+
+std::string ActionScriptHelper::GetSecurityName(AccountTypes accountType)
+{
+    switch (accountType)
+    {
+    case AccountTypes::SEC_PLAYER:
+        return "Player";
+
+    case AccountTypes::SEC_MODERATOR:
+        return "Moderator";
+
+    case AccountTypes::SEC_TICKETMASTER:
+        return "Ticket Master";
+
+    case AccountTypes::SEC_GAMEMASTER:
+        return "Game Master";
+
+    case AccountTypes::SEC_BASIC_ADMIN:
+        return "Basic Administrator";
+
+    case AccountTypes::SEC_DEVELOPER:
+        return "Developer";
+
+    case AccountTypes::SEC_ADMINISTRATOR:
+        return "Administrator";
+
+    case AccountTypes::SEC_CONSOLE:
+        return "Console";
+    }
+}
+
+bool ActionScriptHelper::ReplaceString(std::string& s, std::string target, std::string value)
+{
+    auto it = s.find(target);
+    if (it == std::string::npos)
+    {
+        return false;
+    }
+
+    s.replace(it, target.length(), value);
+
+    return true;
+}
